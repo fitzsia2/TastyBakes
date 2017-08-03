@@ -1,7 +1,7 @@
 package com.afitzwa.andrew.tastybakes.data;
 
 /**
- * Created by Andrew on 8/3/17.
+ * Used for mocking online data
  */
 
 public class JsonData {
