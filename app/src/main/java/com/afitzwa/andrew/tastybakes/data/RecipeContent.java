@@ -29,14 +29,29 @@ public class RecipeContent {
     }
 
     static {
-        JSONArray json;
+        JSONArray recipes;
         try {
-            json = new JSONArray(JsonData.data);
+            // Get all the listed recipes
+            recipes = new JSONArray(JsonData.data);
 
-            for (int ii = 0; ii < json.length(); ii++) {
-                JSONObject o = (JSONObject) json.get(ii);
-                RecipeContent.Recipe recipe = new RecipeContent.Recipe(o.getInt("id"), o.getString("name"));
-                recipe.setServings(o.getInt("servings"));
+            // Iterate through each recipe
+            for (int ii = 0; ii < recipes.length(); ii++) {
+                JSONObject recipeJSON = (JSONObject) recipes.get(ii);
+                RecipeContent.Recipe recipe = new RecipeContent
+                        .Recipe(recipeJSON.getInt("id"), recipeJSON.getString("name"));
+
+                recipe.setServings(recipeJSON.getInt("servings"));
+
+                // Iterate through each ingredient of a recipe
+                JSONArray ingredientArray = recipeJSON.getJSONArray("ingredients");
+                for (int uu = 0; uu < ingredientArray.length(); uu++) {
+                    JSONObject ingredientJSON = (JSONObject) ingredientArray.get(uu);
+                    Ingredient ingredient = new Ingredient(
+                            ingredientJSON.getString("ingredient"),
+                            ingredientJSON.getString("measure"),
+                            ingredientJSON.getInt("quantity"));
+                    recipe.addIngredient(ingredient);
+                }
                 addRecipe(recipe);
             }
         }catch (JSONException e) {
@@ -53,8 +68,8 @@ public class RecipeContent {
         private int mId;
         private String mTitle;
         private int mServings;
-        public static final List<RecipeStep> STEPS = new ArrayList<>();
-        private static final List<Ingredient> mIngredient = new ArrayList<>();
+        public static List<RecipeStep> mSteps = new ArrayList<>();
+        private static List<Ingredient> mIngredients = new ArrayList<>();
 
         public int getId() {
             return mId;
@@ -76,8 +91,16 @@ public class RecipeContent {
             return mServings;
         }
 
-        public void setServings(int mServings) {
+        private void setServings(int mServings) {
             this.mServings = mServings;
+        }
+
+        private void addIngredient(Ingredient ingredient) {
+            mIngredients.add(ingredient);
+        }
+
+        public List<Ingredient> getIngredients() {
+            return mIngredients;
         }
     }
 }

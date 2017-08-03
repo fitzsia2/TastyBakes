@@ -10,7 +10,9 @@ public class Ingredient {
     private String mMeasure;
     private String mName;
 
-    public Ingredient(@NonNull String mName) {
-        this.mName = mName;
+    public Ingredient(@NonNull String name, @NonNull String measure, int quantity) {
+        this.mName = name;
+        this.mMeasure = measure;
+        this.mQuantity = quantity;
     }
 }
