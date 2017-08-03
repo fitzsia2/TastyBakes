@@ -7,7 +7,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
@@ -63,9 +64,14 @@ public class RecipeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_detail, container, false);
-        ScrollView scrollView = rootView.findViewById(R.id.recipe_detail);
+        LinearLayout scrollView = rootView.findViewById(R.id.recipe_detail);
 
-        if(mItem != null) {
+        for (RecipeContent.Recipe.Ingredient ingredient : mItem.getIngredients()) {
+            LinearLayout ll = (LinearLayout) View.inflate(getContext(), R.layout.ingredients, null);
+            ((TextView) ll.findViewById(R.id.ingredient_amount))
+                    .setText(ingredient.getmQuantity() + " " +ingredient.getmMeasure());
+            ((TextView) ll.findViewById(R.id.ingredient_name)).setText(ingredient.getmName());
+            scrollView.addView(ll);
         }
 
         return rootView;

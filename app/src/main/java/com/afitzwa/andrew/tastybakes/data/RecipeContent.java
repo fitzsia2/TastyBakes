@@ -36,27 +36,36 @@ public class RecipeContent {
 
             // Iterate through each recipe
             for (int ii = 0; ii < recipes.length(); ii++) {
+
                 JSONObject recipeJSON = (JSONObject) recipes.get(ii);
-                RecipeContent.Recipe recipe = new RecipeContent
-                        .Recipe(recipeJSON.getInt("id"), recipeJSON.getString("name"));
+
+                RecipeContent.Recipe recipe =
+                        new RecipeContent.Recipe(recipeJSON.getInt("id"), recipeJSON.getString("name"));
 
                 recipe.setServings(recipeJSON.getInt("servings"));
 
                 // Iterate through each ingredient of a recipe
                 JSONArray ingredientArray = recipeJSON.getJSONArray("ingredients");
+
                 for (int uu = 0; uu < ingredientArray.length(); uu++) {
+
                     JSONObject ingredientJSON = (JSONObject) ingredientArray.get(uu);
-                    Ingredient ingredient = new Ingredient(
+
+                    Recipe.Ingredient ingredient = new Recipe.Ingredient(
                             ingredientJSON.getString("ingredient"),
                             ingredientJSON.getString("measure"),
                             ingredientJSON.getInt("quantity"));
+
                     recipe.addIngredient(ingredient);
                 }
+
                 addRecipe(recipe);
             }
-        }catch (JSONException e) {
+        } catch (JSONException e) {
             Log.e(TAG, "JSONException: " + e);
         }
+
+        Log.v(TAG, RecipeContent.RECIPE_MAP.toString());
     }
 
     public static class Recipe {
@@ -68,8 +77,8 @@ public class RecipeContent {
         private int mId;
         private String mTitle;
         private int mServings;
-        public static List<RecipeStep> mSteps = new ArrayList<>();
-        private static List<Ingredient> mIngredients = new ArrayList<>();
+        public List<RecipeStep> mSteps = new ArrayList<>();
+        private List<Ingredient> mIngredients = new ArrayList<>();
 
         public int getId() {
             return mId;
@@ -96,11 +105,73 @@ public class RecipeContent {
         }
 
         private void addIngredient(Ingredient ingredient) {
-            mIngredients.add(ingredient);
+            this.mIngredients.add(ingredient);
+        }
+
+        public void addStep(RecipeStep step) {
+            
         }
 
         public List<Ingredient> getIngredients() {
             return mIngredients;
+        }
+
+        /**
+         * Contains information about individual steps in a recipe
+         */
+        public static class RecipeStep {
+            public String mShortDesc;
+            public String mdescription;
+            public String mVideoURL;
+            public String mThumnailURL;
+
+            public RecipeStep() {}
+        }
+
+        /**
+         * Describes an ingredient in a recipe
+         */
+        public static class Ingredient {
+            private int mQuantity;
+            private String mMeasure;
+            private String mName;
+
+            public Ingredient() {}
+
+            public Ingredient(@NonNull String name, @NonNull String measure, int quantity) {
+                this.mName = name;
+                this.mMeasure = measure;
+                this.mQuantity = quantity;
+            }
+
+            public int getmQuantity() {
+                return mQuantity;
+            }
+
+            public void setmQuantity(int mQuantity) {
+                this.mQuantity = mQuantity;
+            }
+
+            public String getmMeasure() {
+                return mMeasure;
+            }
+
+            public void setmMeasure(String mMeasure) {
+                this.mMeasure = mMeasure;
+            }
+
+            public String getmName() {
+                return mName;
+            }
+
+            public void setmName(String mName) {
+                this.mName = mName;
+            }
+
+            @Override
+            public String toString() {
+                return mName + "," + mQuantity + "," + mMeasure;
+            }
         }
     }
 }
