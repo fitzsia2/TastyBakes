@@ -1,15 +1,19 @@
 package com.afitzwa.andrew.tastybakes;
 
 import android.app.Activity;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.afitzwa.andrew.tastybakes.dummy.DummyContent;
+import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+
+import butterknife.ButterKnife;
 
 /**
  * A fragment representing a single Recipe detail screen.
@@ -18,6 +22,7 @@ import com.afitzwa.andrew.tastybakes.dummy.DummyContent;
  * on handsets.
  */
 public class RecipeDetailFragment extends Fragment {
+    private static final String TAG = RecipeDetailFragment.class.getSimpleName();
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -27,7 +32,7 @@ public class RecipeDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private RecipeContent.Recipe mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -39,17 +44,20 @@ public class RecipeDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ButterKnife.bind(getActivity());
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            String key = getArguments().getString(ARG_ITEM_ID);
+            mItem = RecipeContent.RECIPE_MAP.get(key);
+            assert mItem != null;
 
             Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+            CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.content);
+                appBarLayout.setTitle(mItem.getTitle());
             }
         }
     }
@@ -59,9 +67,32 @@ public class RecipeDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.recipe_detail)).setText(mItem.details);
+        LinearLayout recipeDetailView = rootView.findViewById(R.id.recipe_detail);
+
+        for (RecipeContent.Recipe.Ingredient ingredient : mItem.getIngredients()) {
+
+            LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.ingredients, container, false);
+
+            ((TextView) ll.findViewById(R.id.ingredient_amount))
+                    .setText(ingredient.getmQuantity() + " " + ingredient.getmMeasure());
+
+            ((TextView) ll.findViewById(R.id.ingredient_name)).setText(ingredient.getmName());
+
+            recipeDetailView.addView(ll);
+        }
+
+
+        for (RecipeContent.Recipe.RecipeStep step : mItem.mSteps) {
+
+            recipeDetailView.addView(inflater.inflate(R.layout.list_divider, container, false));
+
+            RelativeLayout stepLayout = (RelativeLayout) inflater.inflate(R.layout.recipe_step_view, container, false);
+
+            ((TextView) stepLayout.findViewById(R.id.short_description_view)).setText(step.getShortDesc());
+
+            ((TextView) stepLayout.findViewById(R.id.description_view)).setText(step.getDescription());
+
+            recipeDetailView.addView(stepLayout);
         }
 
         return rootView;
