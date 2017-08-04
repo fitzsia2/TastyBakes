@@ -4,9 +4,16 @@
     style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
     android:textIsSelectable="true"
-    tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
-    android:orientation="vertical">
+    tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailFragment">
+
+    <TextView
+        style="@android:style/TextAppearance.DeviceDefault.Large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ingredients_text"
+        android:paddingBottom="4dp"/>
 
 </LinearLayout>

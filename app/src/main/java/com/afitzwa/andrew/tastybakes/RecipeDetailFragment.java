@@ -64,14 +64,37 @@ public class RecipeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_detail, container, false);
-        LinearLayout scrollView = rootView.findViewById(R.id.recipe_detail);
+
+        LinearLayout recipeDetailView = rootView.findViewById(R.id.recipe_detail);
 
         for (RecipeContent.Recipe.Ingredient ingredient : mItem.getIngredients()) {
-            LinearLayout ll = (LinearLayout) View.inflate(getContext(), R.layout.ingredients, null);
+
+            LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.ingredients, container, false);
+
             ((TextView) ll.findViewById(R.id.ingredient_amount))
-                    .setText(ingredient.getmQuantity() + " " +ingredient.getmMeasure());
+                    .setText(ingredient.getmQuantity() + " " + ingredient.getmMeasure());
+
             ((TextView) ll.findViewById(R.id.ingredient_name)).setText(ingredient.getmName());
-            scrollView.addView(ll);
+
+            recipeDetailView.addView(ll);
+        }
+
+
+        for (RecipeContent.Recipe.RecipeStep step : mItem.mSteps) {
+
+            recipeDetailView.addView(inflater.inflate(R.layout.list_divider, container, false));
+
+            LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.recipe_step_view, container, false);
+
+            ((TextView) ll.findViewById(R.id.short_description_view)).setText(step.getShortDesc());
+
+            ((TextView) ll.findViewById(R.id.description_view)).setText(step.getDescription());
+
+            if (step.getThumnailURL() != null) {
+                // TODO load thumbnail
+            }
+
+            recipeDetailView.addView(ll);
         }
 
         return rootView;

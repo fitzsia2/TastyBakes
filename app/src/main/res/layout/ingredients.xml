@@ -7,15 +7,16 @@
 
     <TextView
         android:id="@+id/ingredient_amount"
-        android:layout_weight="2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="2"
         tools:text="2 CUPS" />
 
     <TextView
-        android:layout_weight="5"
         android:id="@+id/ingredient_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="5"
         tools:text="Flour" />
+
 </LinearLayout>

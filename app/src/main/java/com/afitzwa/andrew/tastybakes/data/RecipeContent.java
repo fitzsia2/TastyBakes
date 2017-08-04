@@ -44,11 +44,11 @@ public class RecipeContent {
 
                 recipe.setServings(recipeJSON.getInt("servings"));
 
-                // Iterate through each ingredient of a recipe
+                // Iterate through each ingredient and step of a recipe
                 JSONArray ingredientArray = recipeJSON.getJSONArray("ingredients");
+                JSONArray stepArray = recipeJSON.getJSONArray("steps");
 
                 for (int uu = 0; uu < ingredientArray.length(); uu++) {
-
                     JSONObject ingredientJSON = (JSONObject) ingredientArray.get(uu);
 
                     Recipe.Ingredient ingredient = new Recipe.Ingredient(
@@ -59,13 +59,24 @@ public class RecipeContent {
                     recipe.addIngredient(ingredient);
                 }
 
+                for (int uu = 0; uu < stepArray.length(); uu++) {
+                    JSONObject stepJSON = (JSONObject) stepArray.get(uu);
+
+                    Recipe.RecipeStep step = new Recipe.RecipeStep(
+                            stepJSON.getString("shortDescription"),
+                            stepJSON.getString("description"),
+                            stepJSON.getString("videoURL"),
+                            stepJSON.getString("thumbnailURL")
+                    );
+
+                    recipe.addStep(step);
+                }
+
                 addRecipe(recipe);
             }
         } catch (JSONException e) {
             Log.e(TAG, "JSONException: " + e);
         }
-
-        Log.v(TAG, RecipeContent.RECIPE_MAP.toString());
     }
 
     public static class Recipe {
@@ -109,7 +120,7 @@ public class RecipeContent {
         }
 
         public void addStep(RecipeStep step) {
-            
+            mSteps.add(step);
         }
 
         public List<Ingredient> getIngredients() {
@@ -121,11 +132,32 @@ public class RecipeContent {
          */
         public static class RecipeStep {
             public String mShortDesc;
-            public String mdescription;
+            public String mDescription;
             public String mVideoURL;
             public String mThumnailURL;
 
-            public RecipeStep() {}
+            public RecipeStep(String shrtDes, String desc, String vidUrl, String mThmUrl) {
+                this.mShortDesc = shrtDes;
+                this.mDescription = desc;
+                this.mVideoURL = vidUrl;
+                this.mThumnailURL = mThmUrl;
+            }
+
+            public String getShortDesc() {
+                return mShortDesc;
+            }
+
+            public String getDescription() {
+                return mDescription;
+            }
+
+            public String getVideoURL() {
+                return mVideoURL;
+            }
+
+            public String getThumnailURL() {
+                return mThumnailURL;
+            }
         }
 
         /**
@@ -166,11 +198,6 @@ public class RecipeContent {
 
             public void setmName(String mName) {
                 this.mName = mName;
-            }
-
-            @Override
-            public String toString() {
-                return mName + "," + mQuantity + "," + mMeasure;
             }
         }
     }

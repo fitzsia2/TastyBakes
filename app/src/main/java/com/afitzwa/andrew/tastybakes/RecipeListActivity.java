@@ -4,27 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,15 +41,6 @@ public class RecipeListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         View recyclerView = findViewById(R.id.recipe_list);
         assert recyclerView != null;
@@ -104,8 +84,6 @@ public class RecipeListActivity extends AppCompatActivity {
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getApplicationContext(), "Selected item: " + holder.mItem.getTitle(), Toast.LENGTH_SHORT)
-                            .show();
 
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
@@ -150,28 +128,5 @@ public class RecipeListActivity extends AppCompatActivity {
                 return super.toString() + " '" + mContentView.getText() + "'";
             }
         }
-    }
-
-    /**
-     * Taken from https://stackoverflow.com/questions/16233976/android-testing-accessing-json-file
-     * @param fileName example: "data.json"
-     * @param c application context
-     * @return
-     */
-    public static String readFileFromAssets(String fileName, Context c) {
-        try {
-            InputStream is = c.getAssets().open(fileName);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            String text = new String(buffer);
-
-            return text;
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 }
