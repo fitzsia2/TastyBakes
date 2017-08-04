@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
@@ -21,6 +22,7 @@ import butterknife.ButterKnife;
  * on handsets.
  */
 public class RecipeDetailFragment extends Fragment {
+    private static final String TAG = RecipeDetailFragment.class.getSimpleName();
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -84,17 +86,13 @@ public class RecipeDetailFragment extends Fragment {
 
             recipeDetailView.addView(inflater.inflate(R.layout.list_divider, container, false));
 
-            LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.recipe_step_view, container, false);
+            RelativeLayout stepLayout = (RelativeLayout) inflater.inflate(R.layout.recipe_step_view, container, false);
 
-            ((TextView) ll.findViewById(R.id.short_description_view)).setText(step.getShortDesc());
+            ((TextView) stepLayout.findViewById(R.id.short_description_view)).setText(step.getShortDesc());
 
-            ((TextView) ll.findViewById(R.id.description_view)).setText(step.getDescription());
+            ((TextView) stepLayout.findViewById(R.id.description_view)).setText(step.getDescription());
 
-            if (step.getThumnailURL() != null) {
-                // TODO load thumbnail
-            }
-
-            recipeDetailView.addView(ll);
+            recipeDetailView.addView(stepLayout);
         }
 
         return rootView;
