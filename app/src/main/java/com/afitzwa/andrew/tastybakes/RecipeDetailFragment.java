@@ -69,6 +69,7 @@ public class RecipeDetailFragment extends Fragment {
 
         LinearLayout recipeDetailView = rootView.findViewById(R.id.recipe_detail);
 
+        // Build the ingredient list
         for (RecipeContent.Recipe.Ingredient ingredient : mItem.getIngredients()) {
 
             LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.ingredients, container, false);
@@ -81,7 +82,7 @@ public class RecipeDetailFragment extends Fragment {
             recipeDetailView.addView(ll);
         }
 
-
+        // Build the step list
         for (RecipeContent.Recipe.RecipeStep step : mItem.mSteps) {
 
             recipeDetailView.addView(inflater.inflate(R.layout.list_divider, container, false));
