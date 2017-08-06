@@ -25,6 +25,8 @@ import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
  * in a {@link RecipeListActivity}.
  */
 public class RecipeDetailActivity extends AppCompatActivity {
+    private static final String STEP_FRAGMENT_TAG = "STEPTAG";
+
     private static final String TAG = RecipeDetailActivity.class.getSimpleName();
 
     public static final String ARG_ITEM_ID = "item_id";
@@ -94,12 +96,26 @@ public class RecipeDetailActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
 
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, RecipeStepActivity.class);
-                    intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipe());
-                    intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+                    if (mTwoPane) {
+                        Bundle args = new Bundle();
+                        args.putString(RecipeStepFragment.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                        args.putInt(RecipeStepFragment.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
 
-                    context.startActivity(intent);
+                        RecipeStepFragment recipeStepFragment = new RecipeStepFragment();
+                        recipeStepFragment.setArguments(args);
+
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.recipe_step_container, recipeStepFragment, STEP_FRAGMENT_TAG)
+                                .commit();
+                    } else {
+
+                        Context context = view.getContext();
+                        Intent intent = new Intent(context, RecipeStepActivity.class);
+                        intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                        intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+
+                        context.startActivity(intent);
+                    }
                 }
             });
         }
