@@ -1,14 +1,22 @@
 package com.afitzwa.andrew.tastybakes;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+
+import java.util.List;
+
+import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
  * An activity representing a single Recipe detail screen. This
@@ -17,56 +25,116 @@ import android.view.View;
  * in a {@link RecipeListActivity}.
  */
 public class RecipeDetailActivity extends AppCompatActivity {
+    private static final String STEP_FRAGMENT_TAG = "STEPTAG";
+
+    private static final String TAG = RecipeDetailActivity.class.getSimpleName();
+
+    public static final String ARG_ITEM_ID = "item_id";
+
+    /**
+     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
+     * device.
+     */
+    private boolean mTwoPane;
+
+    private RecipeContent.Recipe mRecipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
+
+        mRecipe = RECIPE_MAP.get(getIntent().getStringExtra(RecipeDetailActivity.ARG_ITEM_ID));
+
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
+        toolbar.setTitle(mRecipe.getTitle());
         setSupportActionBar(toolbar);
 
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        RecyclerView recipeDetailRecyclerView = findViewById(R.id.recipe_detail);
+        assert recipeDetailRecyclerView != null;
+        assert mRecipe != null;
+        setupRecyclerView(recipeDetailRecyclerView, mRecipe);
 
-        // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
-        // (e.g. when rotating the screen from portrait to landscape).
-        // In this case, the fragment will automatically be re-added
-        // to its container so we don't need to manually add it.
-        // For more information, see the Fragments API guide at:
-        //
-        // http://developer.android.com/guide/components/fragments.html
-        //
-        if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putString(RecipeDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(RecipeDetailFragment.ARG_ITEM_ID));
-            RecipeDetailFragment fragment = new RecipeDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.recipe_detail_container, fragment)
-                    .commit();
+        if (findViewById(R.id.recipe_step_container) != null) {
+            // The detail container view will be present only in the
+            // large-screen layouts (res/values-w900dp).
+            // If this view is present, then the
+            // activity should be in two-pane mode.
+            mTwoPane = true;
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
-            navigateUpTo(new Intent(this, RecipeListActivity.class));
-            return true;
+    private void setupRecyclerView(@NonNull RecyclerView recyclerView, RecipeContent.Recipe recipe) {
+        recyclerView.setAdapter(new DetailRecyclerViewAdapter(recipe.getSteps()));
+    }
+
+    public class DetailRecyclerViewAdapter
+            extends RecyclerView.Adapter<DetailRecyclerViewAdapter.RecipeStepViewHolder> {
+
+        private final List<RecipeContent.Recipe.RecipeStep> RECIPE_STEP;
+
+        public DetailRecyclerViewAdapter(List<RecipeContent.Recipe.RecipeStep> recipeStep) {
+            RECIPE_STEP = recipeStep;
         }
-        return super.onOptionsItemSelected(item);
+
+        @Override
+        public RecipeStepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recipe_step_list_content, parent, false);
+
+            return new RecipeStepViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(final RecipeStepViewHolder holder, int position) {
+
+            holder.mStep = RECIPE_STEP.get(position);
+            holder.mStepTextView.setText(holder.mStep.getShortDesc());
+
+            holder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    if (mTwoPane) {
+                        Bundle args = new Bundle();
+                        args.putString(RecipeStepFragment.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                        args.putInt(RecipeStepFragment.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+
+                        RecipeStepFragment recipeStepFragment = new RecipeStepFragment();
+                        recipeStepFragment.setArguments(args);
+
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.recipe_step_container, recipeStepFragment, STEP_FRAGMENT_TAG)
+                                .commit();
+                    } else {
+
+                        Context context = view.getContext();
+                        Intent intent = new Intent(context, RecipeStepActivity.class);
+                        intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                        intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+
+                        context.startActivity(intent);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return RECIPE_STEP.size();
+        }
+
+        public class RecipeStepViewHolder extends RecyclerView.ViewHolder {
+            public final View mView;
+            public final TextView mStepTextView;
+            public RecipeContent.Recipe.RecipeStep mStep;
+
+            public RecipeStepViewHolder(View view) {
+                super(view);
+                mView = view;
+                mStepTextView = view.findViewById(R.id.short_description_view);
+            }
+        }
     }
 }

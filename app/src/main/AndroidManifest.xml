@@ -21,12 +21,21 @@
         </activity>
         <activity
             android:name=".RecipeDetailActivity"
-            android:label="@string/title_recipe_detail"
+            android:label="@string/title_activity_recipe_detail"
             android:parentActivityName=".RecipeListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.afitzwa.andrew.tastybakes.RecipeListActivity" />
+        </activity>
+        <activity
+            android:name=".RecipeStepActivity"
+            android:label="@string/title_activity_recipe_step"
+            android:parentActivityName=".RecipeDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.afitzwa.andrew.tastybakes.RecipeDetailActivity" />
         </activity>
     </application>
 

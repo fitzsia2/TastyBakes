@@ -2,12 +2,12 @@
 <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recipe_list"
-    android:name="com.afitzwa.andrew.tastybakes.RecipeListFragment"
+    android:id="@+id/recipe_detail"
+    android:name="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.afitzwa.andrew.tastybakes.RecipeListActivity"
-    tools:listitem="@layout/recipe_list_content" />
+    tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailActivity"
+    tools:listitem="@layout/recipe_step_list_content" />

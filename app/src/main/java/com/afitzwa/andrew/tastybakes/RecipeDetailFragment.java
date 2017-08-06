@@ -7,9 +7,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
@@ -65,35 +62,7 @@ public class RecipeDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.recipe_detail, container, false);
-
-        LinearLayout recipeDetailView = rootView.findViewById(R.id.recipe_detail);
-
-        for (RecipeContent.Recipe.Ingredient ingredient : mItem.getIngredients()) {
-
-            LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.ingredients, container, false);
-
-            ((TextView) ll.findViewById(R.id.ingredient_amount))
-                    .setText(ingredient.getmQuantity() + " " + ingredient.getmMeasure());
-
-            ((TextView) ll.findViewById(R.id.ingredient_name)).setText(ingredient.getmName());
-
-            recipeDetailView.addView(ll);
-        }
-
-
-        for (RecipeContent.Recipe.RecipeStep step : mItem.mSteps) {
-
-            recipeDetailView.addView(inflater.inflate(R.layout.list_divider, container, false));
-
-            RelativeLayout stepLayout = (RelativeLayout) inflater.inflate(R.layout.recipe_step_view, container, false);
-
-            ((TextView) stepLayout.findViewById(R.id.short_description_view)).setText(step.getShortDesc());
-
-            ((TextView) stepLayout.findViewById(R.id.description_view)).setText(step.getDescription());
-
-            recipeDetailView.addView(stepLayout);
-        }
+        View rootView = inflater.inflate(R.layout.recipe_detail_content, container, false);
 
         return rootView;
     }

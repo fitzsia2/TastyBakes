@@ -27,12 +27,6 @@ import java.util.List;
 public class RecipeListActivity extends AppCompatActivity {
     private static final String TAG = RecipeListActivity.class.getSimpleName();
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,19 +34,10 @@ public class RecipeListActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
 
         View recyclerView = findViewById(R.id.recipe_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
-
-        if (findViewById(R.id.recipe_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -62,10 +47,10 @@ public class RecipeListActivity extends AppCompatActivity {
     public class RecipeRecyclerViewAdapter
             extends RecyclerView.Adapter<RecipeRecyclerViewAdapter.RecipeViewHolder> {
 
-        private final List<RecipeContent.Recipe> mRecipes;
+        private final List<RecipeContent.Recipe> RECIPES;
 
         public RecipeRecyclerViewAdapter(List<RecipeContent.Recipe> recipes) {
-            mRecipes = recipes;
+            RECIPES = recipes;
         }
 
         @Override
@@ -77,37 +62,26 @@ public class RecipeListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final RecipeViewHolder holder, int position) {
-            holder.mItem = mRecipes.get(position);
-            holder.mIdView.setText(mRecipes.get(position).getTitle());
-            holder.mContentView.setText(("Serves " + mRecipes.get(position).getServings()));
+            holder.mItem = RECIPES.get(position);
+            holder.mIdView.setText(RECIPES.get(position).getTitle());
+            holder.mContentView.setText(("Serves " + RECIPES.get(position).getServings()));
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(RecipeDetailFragment.ARG_ITEM_ID, holder.mItem.getTitle());
-                        RecipeDetailFragment fragment = new RecipeDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.recipe_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, RecipeDetailActivity.class);
-                        intent.putExtra(RecipeDetailFragment.ARG_ITEM_ID, holder.mItem.getTitle());
+                    Context context = v.getContext();
+                    Intent intent = new Intent(context, RecipeDetailActivity.class);
+                    intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.mItem.getTitle());
 
-                        context.startActivity(intent);
-                    }
-
+                    context.startActivity(intent);
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            return mRecipes.size();
+            return RECIPES.size();
         }
 
         public class RecipeViewHolder extends RecyclerView.ViewHolder {
@@ -121,11 +95,6 @@ public class RecipeListActivity extends AppCompatActivity {
                 mView = view;
                 mIdView = view.findViewById(R.id.recipe_title);
                 mContentView = view.findViewById(R.id.content);
-            }
-
-            @Override
-            public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
             }
         }
     }
