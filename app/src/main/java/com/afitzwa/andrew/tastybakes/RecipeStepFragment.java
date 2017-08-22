@@ -140,6 +140,12 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         Log.d(TAG, "onDownstreamFormatChanged");
     }
 
+    /**
+     * Taken from ExoPlayer's demo application
+     * @param uri
+     * @param overrideExtension
+     * @return
+     */
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
         int type = TextUtils.isEmpty(overrideExtension) ? Util.inferContentType(uri)
                 : Util.inferContentType("." + overrideExtension);
