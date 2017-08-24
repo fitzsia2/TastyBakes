@@ -3,6 +3,7 @@ package com.afitzwa.andrew.tastybakes;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,6 +35,7 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.io.IOException;
 
+import static android.view.View.GONE;
 import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
@@ -87,6 +89,12 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
             mMp4VideoUri = Uri.parse(recipeStep.getVideoURL());
             if (recipeStep.getVideoURL().isEmpty()) {
                 Log.d(TAG, recipeStep.getShortDesc() + ": No video URL");
+                mSimpleExoPlayerView.setVisibility(GONE);
+
+                TextView noVideoText = new TextView(getContext());
+                noVideoText.setText(R.string.video_missing_text);
+
+                ((ConstraintLayout) view).addView(noVideoText);
             } else {
                 mMediaSource = buildMediaSource(mMp4VideoUri, null);
                 mSimpleExoPlayer.prepare(mMediaSource);
