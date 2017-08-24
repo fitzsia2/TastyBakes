@@ -44,6 +44,8 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     public static final String ARG_RECIPE_ID = "item_id";
     public static final String ARG_RECIPE_STEP_ID = "recipe_step_id";
 
+    final static boolean PLAY_WHEN_READY = true;
+
     // Exoplayer resources
     private Handler mMainHandler;
     private Uri mMp4VideoUri;
@@ -52,6 +54,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     private DefaultTrackSelector mTrackSelector;
     private MediaSource mMediaSource;
     private DataSource.Factory mediaDataSourceFactory;
+    private int positionMs;
 
     public RecipeStepFragment() {
     }
@@ -87,7 +90,9 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
             } else {
                 mMediaSource = buildMediaSource(mMp4VideoUri, null);
                 mSimpleExoPlayer.prepare(mMediaSource);
-                mSimpleExoPlayer.seekTo(0);
+                mSimpleExoPlayer.setPlayWhenReady(PLAY_WHEN_READY);
+                positionMs = 0;
+                mSimpleExoPlayer.seekTo(positionMs);
             }
         }
 
@@ -97,7 +102,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSimpleExoPlayer.release();
+        ReleasePlayer();
     }
 
     @Override
@@ -142,6 +147,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
 
     /**
      * Taken from ExoPlayer's demo application
+     *
      * @param uri
      * @param overrideExtension
      * @return
@@ -165,5 +171,11 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
+    }
+
+    private void ReleasePlayer() {
+        mSimpleExoPlayer.stop();
+        mSimpleExoPlayer.release();
+        mSimpleExoPlayer = null;
     }
 }
