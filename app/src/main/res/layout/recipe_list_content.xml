@@ -23,8 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/image_preview_view"
         android:layout_toRightOf="@id/image_preview_view"
-        android:paddingLeft="8dp"
-        android:paddingStart="8dp"
         android:textAppearance="?attr/textAppearanceListItem"
         tools:text="Nutella Pie" />
 
@@ -35,8 +33,6 @@
         android:layout_below="@id/recipe_title"
         android:layout_toEndOf="@id/image_preview_view"
         android:layout_toRightOf="@id/image_preview_view"
-        android:paddingLeft="8dp"
-        android:paddingStart="8dp"
         android:textAppearance="?attr/textAppearanceListItem"
         tools:text="Serves 10" />
 </RelativeLayout>

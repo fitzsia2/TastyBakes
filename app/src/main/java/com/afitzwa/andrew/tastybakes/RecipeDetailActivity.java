@@ -152,7 +152,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
                         if (mTwoPane) {
                             Bundle args = new Bundle();
                             args.putString(RecipeStepFragment.ARG_RECIPE_ID, holder.mStep.getRecipe());
-                            args.putInt(RecipeStepFragment.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+                            args.putInt(RecipeStepFragment.ARG_RECIPE_STEP_ID, holder.getAdapterPosition() - 1);
 
                             RecipeStepFragment recipeStepFragment = new RecipeStepFragment();
                             recipeStepFragment.setArguments(args);
@@ -165,7 +165,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
                             Context context = view.getContext();
                             Intent intent = new Intent(context, RecipeStepActivity.class);
                             intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipe());
-                            intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition());
+                            intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition() - 1);
 
                             context.startActivity(intent);
                         }
