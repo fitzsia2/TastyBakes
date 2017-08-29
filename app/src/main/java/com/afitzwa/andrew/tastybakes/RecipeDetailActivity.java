@@ -19,7 +19,6 @@ import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
 import java.util.List;
 
-import static android.support.v7.recyclerview.R.attr.layoutManager;
 import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
@@ -79,7 +78,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
     }
 
     public class DetailRecyclerViewAdapter
-            extends RecyclerView.Adapter<DetailRecyclerViewAdapter.RecipeStepViewHolder> {
+            extends RecyclerView.Adapter<RecipeStepViewHolder> {
 
         private final List<RecipeContent.Recipe.RecipeStep> RECIPE_STEP;
 
@@ -123,7 +122,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
                 holder.mStep = RECIPE_STEP.get(position);
 
                 List<RecipeContent.Recipe.Ingredient> ingredients =
-                        RECIPE_MAP.get(holder.mStep.getRecipe()).getIngredients();
+                        RECIPE_MAP.get(holder.mStep.getRecipeTitle()).getIngredients();
 
                 for (RecipeContent.Recipe.Ingredient ingredient : ingredients) {
 
@@ -133,8 +132,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
                     TextView ingredientAmount = ingredientLayout.findViewById(R.id.ingredient_amount);
                     TextView ingredientName = ingredientLayout.findViewById(R.id.ingredient_name);
 
-                    ingredientAmount.setText(ingredient.getmQuantity() + " " + ingredient.getmMeasure());
-                    ingredientName.setText(ingredient.getmName());
+                    ingredientAmount.setText(ingredient.getQuantity() + " " + ingredient.getMeasure());
+                    ingredientName.setText(ingredient.getName());
 
                     ((LinearLayout)holder.mView).addView(ingredientLayout);
                 }
@@ -151,7 +150,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
                         if (mTwoPane) {
                             Bundle args = new Bundle();
-                            args.putString(RecipeStepFragment.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                            args.putString(RecipeStepFragment.ARG_RECIPE_ID, holder.mStep.getRecipeTitle());
                             args.putInt(RecipeStepFragment.ARG_RECIPE_STEP_ID, holder.getAdapterPosition() - 1);
 
                             RecipeStepFragment recipeStepFragment = new RecipeStepFragment();
@@ -164,7 +163,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
                             Context context = view.getContext();
                             Intent intent = new Intent(context, RecipeStepActivity.class);
-                            intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipe());
+                            intent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, holder.mStep.getRecipeTitle());
                             intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, holder.getAdapterPosition() - 1);
 
                             context.startActivity(intent);
@@ -179,16 +178,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
             return RECIPE_STEP.size() + 1;
         } // +1 for ingredient list
 
-        public class RecipeStepViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mStepTextView;
-            public RecipeContent.Recipe.RecipeStep mStep;
-
-            public RecipeStepViewHolder(View view) {
-                super(view);
-                mView = view;
-                mStepTextView = view.findViewById(R.id.short_description_view);
-            }
-        }
     }
+
 }

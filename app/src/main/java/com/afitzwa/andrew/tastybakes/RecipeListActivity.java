@@ -8,14 +8,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+import com.afitzwa.andrew.tastybakes.network.FetchUrlTask;
+import com.afitzwa.andrew.tastybakes.network.IFetchUrlTask;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * An activity representing a list of Recipes. This activity
@@ -25,20 +30,25 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class RecipeListActivity extends AppCompatActivity {
+public class RecipeListActivity extends AppCompatActivity implements IFetchUrlTask {
     private static final String TAG = RecipeListActivity.class.getSimpleName();
+    private static final String RECIPE_URL = "http://go.udacity.com/android-baking-app-json";
+
+    @BindView(R.id.recipe_list) RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate");
         setContentView(R.layout.activity_recipe_list);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
 
-        View recyclerView = findViewById(R.id.recipe_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        setSupportActionBar(mToolbar);
+
+        FetchUrlTask fetchUrlTask = new FetchUrlTask(this);
+        fetchUrlTask.execute(RECIPE_URL);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -48,12 +58,20 @@ public class RecipeListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new RecipeRecyclerViewAdapter(RecipeContent.RECIPES));
     }
 
+    @Override
+    public void handleFetchUrlResult(String result) {
+        RecipeContent recipeContent = new RecipeContent();
+        recipeContent.buildListFromJSONString(result);
+
+        setupRecyclerView(mRecyclerView);
+    }
+
     public class RecipeRecyclerViewAdapter
-            extends RecyclerView.Adapter<RecipeRecyclerViewAdapter.RecipeViewHolder> {
+            extends RecyclerView.Adapter<RecipeViewHolder> {
 
         private final List<RecipeContent.Recipe> RECIPES;
 
-        public RecipeRecyclerViewAdapter(List<RecipeContent.Recipe> recipes) {
+        private RecipeRecyclerViewAdapter(List<RecipeContent.Recipe> recipes) {
             RECIPES = recipes;
         }
 
@@ -66,17 +84,17 @@ public class RecipeListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final RecipeViewHolder holder, int position) {
-            holder.mItem = RECIPES.get(position);
-            holder.mIdView.setText(RECIPES.get(position).getTitle());
-            holder.mContentView.setText(("Serves " + RECIPES.get(position).getServings()));
+            holder.setRecipe(RECIPES.get(position));
+            holder.getIdView().setText(RECIPES.get(position).getTitle());
+            holder.getContentView().setText(("Serves " + RECIPES.get(position).getServings()));
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+            holder.getView().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     Context context = v.getContext();
                     Intent intent = new Intent(context, RecipeDetailActivity.class);
-                    intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.mItem.getTitle());
+                    intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.getRecipe().getTitle());
 
                     context.startActivity(intent);
                 }
@@ -88,18 +106,6 @@ public class RecipeListActivity extends AppCompatActivity {
             return RECIPES.size();
         }
 
-        public class RecipeViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
-            public RecipeContent.Recipe mItem;
-
-            public RecipeViewHolder(View view) {
-                super(view);
-                mView = view;
-                mIdView = view.findViewById(R.id.recipe_title);
-                mContentView = view.findViewById(R.id.content);
-            }
-        }
     }
+
 }

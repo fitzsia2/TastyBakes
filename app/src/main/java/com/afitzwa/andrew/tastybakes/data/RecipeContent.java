@@ -19,20 +19,23 @@ import java.util.Map;
 public class RecipeContent {
     private static final String TAG = RecipeContent.class.getSimpleName();
 
-    public static final List<Recipe> RECIPES = new ArrayList<>();
+    public static List<Recipe> RECIPES = new ArrayList<>();
 
     public static final Map<String, Recipe> RECIPE_MAP = new HashMap<>();
 
-    static private void addRecipe(Recipe recipe) {
-        RECIPES.add(recipe);
-        RECIPE_MAP.put(recipe.getTitle(), recipe);
+    private void addRecipe(Recipe recipe) {
+        if (RECIPE_MAP.get(recipe.getTitle()) == null) {
+            RECIPES.add(recipe);
+            RECIPE_MAP.put(recipe.getTitle(), recipe);
+        }
+
     }
 
-    static {
+    public void buildListFromJSONString(String s) {
         JSONArray recipes;
         try {
             // Get all the listed recipes
-            recipes = new JSONArray(JsonData.data);
+            recipes = new JSONArray(s);
 
             // Iterate through each recipe
             for (int ii = 0; ii < recipes.length(); ii++) {
@@ -85,7 +88,7 @@ public class RecipeContent {
         private String mTitle;
         private int mServings;
 
-        public List<RecipeStep> mSteps = new ArrayList<>();
+        private List<RecipeStep> mSteps = new ArrayList<>();
         private List<Ingredient> mIngredients = new ArrayList<>();
 
         private Recipe(int id, @NonNull String title) {
@@ -125,7 +128,7 @@ public class RecipeContent {
             this.mIngredients.add(ingredient);
         }
 
-        public void addStep(RecipeStep step) {
+        private void addStep(RecipeStep step) {
             mSteps.add(step);
         }
 
@@ -137,22 +140,22 @@ public class RecipeContent {
          * Contains information about individual steps in a recipe
          */
         public static class RecipeStep {
-            public String mTitle;           // A short title for this step
-            public String mRecipe;          // Name of the recipe this step belongs to
-            public String mDescription;     // Detailed description of this step
-            public String mVideoURL;        // URL for this step instructional video
-            public String mThumbnailURL;    // URL of a thumbnail for this step
+            private String mTitle;           // A short title for this step
+            private String mRecipeTitle;     // Name of the recipe this step belongs to
+            private String mDescription;     // Detailed description of this step
+            private String mVideoURL;        // URL for this step instructional video
+            private String mThumbnailURL;    // URL of a thumbnail for this step
 
-            public RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl) {
-                this.mRecipe = recipe;
+            private RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl) {
+                this.mRecipeTitle = recipe;
                 this.mTitle = shrtDes;
                 this.mDescription = desc;
                 this.mVideoURL = vidUrl;
                 this.mThumbnailURL = mThmUrl;
             }
 
-            public String getRecipe() {
-                return mRecipe;
+            public String getRecipeTitle() {
+                return mRecipeTitle;
             }
 
             public String getShortDesc() {
@@ -180,38 +183,24 @@ public class RecipeContent {
             private String mMeasure;
             private String mName;
 
-            public Ingredient() {
-            }
-
-            public Ingredient(@NonNull String name, @NonNull String measure, int quantity) {
+            private Ingredient(@NonNull String name, @NonNull String measure, int quantity) {
                 this.mName = name;
                 this.mMeasure = measure;
                 this.mQuantity = quantity;
             }
 
-            public int getmQuantity() {
+            public int getQuantity() {
                 return mQuantity;
             }
 
-            public void setmQuantity(int mQuantity) {
-                this.mQuantity = mQuantity;
-            }
-
-            public String getmMeasure() {
+            public String getMeasure() {
                 return mMeasure;
             }
 
-            public void setmMeasure(String mMeasure) {
-                this.mMeasure = mMeasure;
-            }
-
-            public String getmName() {
+            public String getName() {
                 return mName;
             }
 
-            public void setmName(String mName) {
-                this.mName = mName;
-            }
         }
     }
 }
