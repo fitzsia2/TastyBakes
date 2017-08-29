@@ -7,4 +7,7 @@
     <string name="ingredients_text">Ingredients</string>
     <string name="action_settings">Settings</string>
     <string name="video_missing_text">No video available</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 </resources>
