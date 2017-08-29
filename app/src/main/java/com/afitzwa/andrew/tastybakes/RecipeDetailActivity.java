@@ -28,10 +28,7 @@ import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
  * in a {@link RecipeListActivity}.
  */
 public class RecipeDetailActivity extends AppCompatActivity {
-    private static final String STEP_FRAGMENT_TAG = "STEPTAG";
-
-    private static final int VIEW_TYPE_INGREDIENTS = 0;
-    private static final int VIEW_TYPE_STEP = 1;
+    private static final String STEP_FRAGMENT_TAG = "STEP_TAG";
 
     private static final String TAG = RecipeDetailActivity.class.getSimpleName();
 
@@ -80,6 +77,9 @@ public class RecipeDetailActivity extends AppCompatActivity {
     public class DetailRecyclerViewAdapter
             extends RecyclerView.Adapter<RecipeStepViewHolder> {
 
+        private static final int VIEW_TYPE_INGREDIENTS = 0;
+        private static final int VIEW_TYPE_STEP = 1;
+
         private final List<RecipeContent.Recipe.RecipeStep> RECIPE_STEP;
 
         public DetailRecyclerViewAdapter(List<RecipeContent.Recipe.RecipeStep> recipeStep) {
@@ -115,8 +115,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final RecipeStepViewHolder holder, int position) {
-
-
             if (getItemViewType(position) == VIEW_TYPE_INGREDIENTS) {
 
                 holder.mStep = RECIPE_STEP.get(position);

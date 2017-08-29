@@ -7,7 +7,7 @@ import android.widget.TextView;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
 /**
- * Created by Andrew on 8/29/17.
+ * View holder for managing steps of a recipe.
  */
 public class RecipeStepViewHolder extends RecyclerView.ViewHolder {
     public final View mView;

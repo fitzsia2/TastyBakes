@@ -7,7 +7,7 @@ import android.widget.TextView;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
 /**
- * Created by Andrew on 8/29/17.
+ * View holder for managing a recipe (listing recipes)
  */
 public class RecipeViewHolder extends RecyclerView.ViewHolder {
 

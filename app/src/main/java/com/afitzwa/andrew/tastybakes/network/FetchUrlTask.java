@@ -9,11 +9,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by Andrew on 8/28/17.
+ * Fetches URL Data
  */
 
 public class FetchUrlTask extends AsyncTask<String, Void, String> {
-    IFetchUrlTask mCaller;
+    private IFetchUrlTask mCaller;
 
     public FetchUrlTask(IFetchUrlTask cb) {
         mCaller = cb;

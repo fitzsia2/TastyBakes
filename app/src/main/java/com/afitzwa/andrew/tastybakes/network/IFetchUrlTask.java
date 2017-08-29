@@ -1,7 +1,7 @@
 package com.afitzwa.andrew.tastybakes.network;
 
 /**
- * Created by Andrew on 8/28/17.
+ * Interface for FetchUrlTask
  */
 
 public interface IFetchUrlTask {
