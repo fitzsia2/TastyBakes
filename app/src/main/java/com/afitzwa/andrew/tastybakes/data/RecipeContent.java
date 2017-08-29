@@ -1,8 +1,5 @@
 package com.afitzwa.andrew.tastybakes.data;
 
-import android.support.annotation.NonNull;
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,8 +14,6 @@ import java.util.Map;
  */
 
 public class RecipeContent {
-    private static final String TAG = RecipeContent.class.getSimpleName();
-
     public static List<Recipe> RECIPES = new ArrayList<>();
 
     public static final Map<String, Recipe> RECIPE_MAP = new HashMap<>();
@@ -79,7 +74,7 @@ public class RecipeContent {
                 addRecipe(recipe);
             }
         } catch (JSONException e) {
-            Log.e(TAG, "JSONException: " + e);
+            return;
         }
     }
 
@@ -91,7 +86,7 @@ public class RecipeContent {
         private List<RecipeStep> mSteps = new ArrayList<>();
         private List<Ingredient> mIngredients = new ArrayList<>();
 
-        private Recipe(int id, @NonNull String title) {
+        private Recipe(int id, String title) {
             this.mId = id;
             this.mTitle = title;
         }
@@ -183,7 +178,7 @@ public class RecipeContent {
             private String mMeasure;
             private String mName;
 
-            private Ingredient(@NonNull String name, @NonNull String measure, int quantity) {
+            private Ingredient(String name, String measure, int quantity) {
                 this.mName = name;
                 this.mMeasure = measure;
                 this.mQuantity = quantity;
