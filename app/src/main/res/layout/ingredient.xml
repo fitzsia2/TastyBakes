@@ -6,22 +6,16 @@
 
     <TextView
         android:id="@+id/ingredient_amount"
-        style="@android:style/TextAppearance.DeviceDefault.Medium"
-        android:layout_width="wrap_content"
+        android:layout_width="96dp"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/ingredient_name"
-        android:paddingRight="24dp"
-        android:gravity="center"
         tools:text="2 CUPS" />
 
     <TextView
         android:id="@+id/ingredient_name"
-        style="@android:style/TextAppearance.DeviceDefault.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_centerInParent="true"
-        android:paddingLeft="0dp"
+        android:layout_toRightOf="@+id/ingredient_amount"
+        android:layout_toEndOf="@+id/ingredient_amount"
         tools:text="Flour" />
 
 </RelativeLayout>
