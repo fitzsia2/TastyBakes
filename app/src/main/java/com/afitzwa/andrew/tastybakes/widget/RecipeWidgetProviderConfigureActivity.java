@@ -1,4 +1,4 @@
-package com.afitzwa.andrew.tastybakes;
+package com.afitzwa.andrew.tastybakes.widget;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -6,24 +6,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.afitzwa.andrew.tastybakes.R;
+import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+
+import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
  * The configuration screen for the {@link RecipeWidgetProvider RecipeWidgetProvider} AppWidget.
  */
 public class RecipeWidgetProviderConfigureActivity extends Activity {
+    private static final String TAG = RecipeWidgetProviderConfigureActivity.class.getSimpleName();
 
-    private static final String PREFS_NAME = "com.afitzwa.andrew.tastybakes.RecipeWidgetProvider";
+    private static final String PREFS_NAME = "com.afitzwa.andrew.tastybakes.widget.RecipeWidgetProvider";
     private static final String PREF_PREFIX_KEY = "appwidget_";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     EditText mAppWidgetText;
+
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = RecipeWidgetProviderConfigureActivity.this;
 
             // When the button is clicked, store the string locally
-            String widgetText = mAppWidgetText.getText().toString();
+            String widgetText = RecipeContent.RECIPES.get(0).getTitle();
+            Log.v(TAG, widgetText);
             saveTitlePref(context, mAppWidgetId, widgetText);
 
             // It is the responsibility of the configuration activity to update the app widget
@@ -51,13 +60,14 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
 
     // Read the prefix from the SharedPreferences object for this widget.
     // If there is no preference saved, get the default from a resource
-    static String loadTitlePref(Context context, int appWidgetId) {
+    static RecipeContent.Recipe loadTitlePref(Context context, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
         String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
         if (titleValue != null) {
-            return titleValue;
+            Log.v(TAG, titleValue);
+            return RECIPE_MAP.get(titleValue);
         } else {
-            return context.getString(R.string.appwidget_text);
+            return null;
         }
     }
 
@@ -69,6 +79,7 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
 
     @Override
     public void onCreate(Bundle icicle) {
+        Log.v(TAG, "onCreate");
         super.onCreate(icicle);
 
         // Set the result to CANCELED.  This will cause the widget host to cancel
@@ -93,7 +104,12 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
             return;
         }
 
-        mAppWidgetText.setText(loadTitlePref(RecipeWidgetProviderConfigureActivity.this, mAppWidgetId));
+        RecipeContent.Recipe recipe = loadTitlePref(RecipeWidgetProviderConfigureActivity.this, mAppWidgetId);
+
+        if(recipe != null) {
+            mAppWidgetText.setText(recipe.getTitle());
+        }
     }
+
 }
 

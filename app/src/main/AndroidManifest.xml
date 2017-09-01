@@ -40,9 +40,10 @@
                 android:value="com.afitzwa.andrew.tastybakes.RecipeDetailActivity" />
         </activity>
 
-        <receiver android:name=".RecipeWidgetProvider">
+        <receiver android:name=".widget.RecipeWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.sam_chordas.android.stockhawk.app.ACTION_DATA_UPDATED" />
             </intent-filter>
 
             <meta-data
@@ -50,11 +51,17 @@
                 android:resource="@xml/recipe_widget_provider_info" />
         </receiver>
 
-        <activity android:name=".RecipeWidgetProviderConfigureActivity">
+        <activity android:name=".widget.RecipeWidgetProviderConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".widget.RecipeRemoteViewsService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>
