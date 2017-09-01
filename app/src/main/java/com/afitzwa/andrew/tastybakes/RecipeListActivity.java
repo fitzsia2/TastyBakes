@@ -1,5 +1,6 @@
 package com.afitzwa.andrew.tastybakes;
 
+import android.content.ContentProviderOperation;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 import com.afitzwa.andrew.tastybakes.network.FetchUrlTask;
 import com.afitzwa.andrew.tastybakes.network.IFetchUrlTask;
 
@@ -46,7 +48,7 @@ public class RecipeListActivity extends AppCompatActivity implements IFetchUrlTa
 
     public void handleFetchUrlResult(String result) {
         RecipeContent recipeContent = new RecipeContent();
-        recipeContent.buildListFromJSONString(result);
+        recipeContent.buildListFromJSONString(this, result);
 
         setupRecyclerView(mRecyclerView);
     }

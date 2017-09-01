@@ -1,5 +1,12 @@
 package com.afitzwa.andrew.tastybakes.data;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.Context;
+import android.content.OperationApplicationException;
+import android.os.RemoteException;
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +21,7 @@ import java.util.Map;
  */
 
 public class RecipeContent {
+    private static final String TAG = RecipeContent.class.getSimpleName();
     public static List<Recipe> RECIPES = new ArrayList<>();
 
     public static final Map<String, Recipe> RECIPE_MAP = new HashMap<>();
@@ -26,8 +34,9 @@ public class RecipeContent {
 
     }
 
-    public void buildListFromJSONString(String s) {
+    public void buildListFromJSONString(Context context, String s) {
         JSONArray recipes;
+
         try {
             // Get all the listed recipes
             recipes = new JSONArray(s);
@@ -71,10 +80,25 @@ public class RecipeContent {
                     recipe.addStep(step);
                 }
 
+
+                ContentProviderOperation.Builder builder =
+                        ContentProviderOperation.newUpdate(RecipeProvider.Recipes.CONTENT_URI);
+                builder.withValue(RecipeColumns.NAME, recipe.getTitle());
+                builder.withValue(RecipeColumns.SERVINGS, recipe.getServings());
+                builder.withValue(RecipeColumns.IMAGE_URL, recipe.getmImageUrl());
+
+                ArrayList<ContentProviderOperation> batchOperations = new ArrayList<ContentProviderOperation>();
+                batchOperations.add(builder.build());
+
+                ContentProviderResult[] results = context.getContentResolver()
+                        .applyBatch(RecipeProvider.AUTHORITY, batchOperations);
+
+                Log.v(TAG, "Applied " + results.length);
+
                 addRecipe(recipe);
             }
-        } catch (JSONException e) {
-            return;
+        } catch (JSONException | RemoteException | OperationApplicationException e) {
+            e.printStackTrace();
         }
     }
 
@@ -82,6 +106,7 @@ public class RecipeContent {
         private int mId;
         private String mTitle;
         private int mServings;
+        private String mImageUrl;
 
         private List<RecipeStep> mSteps = new ArrayList<>();
         private List<Ingredient> mIngredients = new ArrayList<>();
@@ -129,6 +154,10 @@ public class RecipeContent {
 
         public List<Ingredient> getIngredients() {
             return mIngredients;
+        }
+
+        public String getmImageUrl() {
+            return mImageUrl;
         }
 
         /**

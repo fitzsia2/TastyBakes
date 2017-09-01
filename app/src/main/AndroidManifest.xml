@@ -39,6 +39,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.afitzwa.andrew.tastybakes.RecipeDetailActivity" />
         </activity>
+        <provider
+            android:authorities="com.afitzwa.andrew.tastybakes.data.RecipeProvider"
+            android:exported="false"
+            android:name=".data.generated.RecipeProvider" />
+        <provider
+            android:authorities="com.afitzwa.andrew.tastybakes.data.IngredientProvider"
+            android:exported="false"
+            android:name=".data.generated.IngredientProvider" />
+        <provider
+            android:authorities="com.afitzwa.andrew.tastybakes.data.StepProvider"
+            android:exported="false"
+            android:name=".data.generated.StepProvider" />
     </application>
 
 </manifest>
