@@ -42,7 +42,7 @@
 
         <provider
             android:authorities="com.afitzwa.andrew.tastybakes.data.RecipeProvider"
-            android:exported="false"
+            android:exported="true"
             android:name=".data.generated.RecipeProvider" />
         <provider
             android:authorities="com.afitzwa.andrew.tastybakes.data.IngredientProvider"
