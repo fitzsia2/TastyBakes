@@ -9,6 +9,9 @@ import android.widget.RemoteViewsService;
 import com.afitzwa.andrew.tastybakes.R;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
+import java.util.List;
+
+import static com.afitzwa.andrew.tastybakes.R.layout.ingredient;
 import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
@@ -55,8 +58,10 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
                     return null;
                 }
                 String packageName = getPackageName();
-                RemoteViews views = new RemoteViews(packageName, R.layout.ingredient);
-                views.setTextViewText(R.id.ingredient_amount, mRecipe.getIngredients().get(i).getName());
+                RemoteViews views = new RemoteViews(packageName, ingredient);
+                RecipeContent.Recipe.Ingredient ingredient = mRecipe.getIngredients().get(i);
+                views.setTextViewText(R.id.ingredient_amount, ingredient.getQuantity() + " " + ingredient.getMeasure());
+                views.setTextViewText(R.id.ingredient_name, mRecipe.getIngredients().get(i).getName());
 
                 return views;
             }

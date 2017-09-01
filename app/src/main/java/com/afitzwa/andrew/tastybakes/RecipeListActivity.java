@@ -50,9 +50,10 @@ public class RecipeListActivity extends AppCompatActivity implements IFetchUrlTa
         RecipeContent recipeContent = new RecipeContent();
         recipeContent.buildListFromJSONString(result);
 
+        // Alert any widgets that we've updated recipes
         Intent intent = new Intent(this, RecipeWidgetProvider.class)
                 .setPackage(this.getPackageName());
-        intent.setAction(RecipeWidgetProvider.ACTION_DATA_UPDATED);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         this.sendBroadcast(intent);
 
         setupRecyclerView(mRecyclerView);
