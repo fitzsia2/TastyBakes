@@ -37,8 +37,6 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
                 RecipeWidgetProviderConfigureActivity.loadTitlePref(context, appWidgetId);
 
         if (recipe != null) {
-            Log.v(TAG, "Adding adapter to widgetView");
-
             widgetView.setTextViewText(R.id.widget_recipe_title_text_view, recipe.getTitle());
 
             Intent intent = new Intent(context, RecipeRemoteViewsService.class);
@@ -53,7 +51,6 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.v(TAG, "onUpdate");
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
@@ -62,7 +59,6 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-        Log.v(TAG, "onDeleted");
         // When the user deletes the widget, delete the preference associated with it.
         for (int appWidgetId : appWidgetIds) {
             RecipeWidgetProviderConfigureActivity.deleteTitlePref(context, appWidgetId);

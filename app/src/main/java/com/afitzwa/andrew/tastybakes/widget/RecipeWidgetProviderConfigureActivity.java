@@ -32,7 +32,6 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
 
             // When the button is clicked, store the string locally
             String widgetText = RecipeContent.RECIPES.get(0).getTitle();
-            Log.v(TAG, widgetText);
             saveTitlePref(context, mAppWidgetId, widgetText);
 
             // It is the responsibility of the configuration activity to update the app widget
@@ -64,7 +63,6 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
         String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
         if (titleValue != null) {
-            Log.v(TAG, titleValue);
             return RECIPE_MAP.get(titleValue);
         } else {
             return null;
@@ -79,7 +77,6 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
 
     @Override
     public void onCreate(Bundle icicle) {
-        Log.v(TAG, "onCreate");
         super.onCreate(icicle);
 
         // Set the result to CANCELED.  This will cause the widget host to cancel

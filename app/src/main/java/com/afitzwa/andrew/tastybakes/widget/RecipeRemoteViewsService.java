@@ -44,7 +44,6 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
                 String recipeTitle = intent.getExtras().getString(RECIPE_TITLE_KEY);
                 mRecipe = RECIPE_MAP.get(recipeTitle);
                 if (mRecipe != null) {
-                    Log.v(TAG, mRecipe.getTitle());
                     return mRecipe.getIngredients().size();
                 }
                 return 0;

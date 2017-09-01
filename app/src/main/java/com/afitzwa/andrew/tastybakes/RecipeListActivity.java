@@ -36,7 +36,6 @@ public class RecipeListActivity extends AppCompatActivity implements IFetchUrlTa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate");
         setContentView(R.layout.activity_recipe_list);
 
         ButterKnife.bind(this);
