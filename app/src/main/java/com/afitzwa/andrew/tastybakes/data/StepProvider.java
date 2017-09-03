@@ -29,7 +29,8 @@ public class StepProvider {
     public static class Steps {
         @ContentUri(
                 path = Path.STEPS,
-                type = "vnd.android.cursor.dir/steps"
+                type = "vnd.android.cursor.dir/steps",
+                defaultSort = RecipeColumns.NAME + " ASC"
         )
         public static final Uri CONTENT_URI = buildUri(Path.STEPS);
 
