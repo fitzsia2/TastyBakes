@@ -1,13 +1,20 @@
 package com.afitzwa.andrew.tastybakes.widget;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Binder;
 import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.afitzwa.andrew.tastybakes.R;
+import com.afitzwa.andrew.tastybakes.data.IngredientColumns;
+import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
+import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 
 import java.util.List;
 
@@ -25,7 +32,14 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(final Intent intent) {
         return new RemoteViewsFactory() {
-            private RecipeContent.Recipe mRecipe;
+
+            private final String[] COL_SELECTION = new String[]{
+                    IngredientColumns.INGREDIENT,
+                    IngredientColumns.QUANTITY,
+                    IngredientColumns.MEASURE,
+            };
+
+            private Cursor mCursor;
 
             @Override
             public void onCreate() {
@@ -34,34 +48,86 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
 
             @Override
             public void onDataSetChanged() {
+                if (mCursor != null)
+                    mCursor.close();
 
+                // This method is called by the app hosting the widget (e.g., the launcher)
+                // However, our ContentProvider is not exported so it doesn't have access to the
+                // data. Therefore we need to clear (and finally restore) the calling identity so
+                // that calls use our process and permission
+                final long identityToken = Binder.clearCallingIdentity();
+
+                String recipe = intent.getExtras().getString(RECIPE_TITLE_KEY, null);
+
+                Cursor recipeCursor =  getContentResolver().query(
+                        RecipeProvider.Recipes.CONTENT_URI,
+                        null, null, null, null);
+
+                if (recipeCursor != null) {
+
+                    if (recipeCursor.moveToFirst()) {
+
+                        Log.v(TAG, "[onDataSetChanged]Found " + recipeCursor.getCount() + " records for " + recipe);
+
+                        int idCol = recipeCursor.getColumnIndexOrThrow(RecipeColumns._ID);
+
+                        int recipeId = recipeCursor.getInt(idCol);
+
+                        mCursor = getContentResolver().query(IngredientProvider.Ingredients.CONTENT_URI,
+                                COL_SELECTION,
+                                IngredientColumns.RECIPE_FK + " = " + recipeId,
+                                null, null);
+
+                    } else {
+                        Log.e(TAG, "[onDataSetChanged]Could not move to first record");
+                    }
+
+                    recipeCursor.close();
+
+                } else {
+                    Log.e(TAG, "[onDataSetChanged]Could not get recipe cursor");
+                }
+
+
+                Binder.restoreCallingIdentity(identityToken);
             }
 
             @Override
             public void onDestroy() {
-                mRecipe = null;
+                if (mCursor != null)
+                    mCursor.close();
             }
 
             @Override
             public int getCount() {
-                String recipeTitle = intent.getExtras().getString(RECIPE_TITLE_KEY);
-                mRecipe = RECIPE_MAP.get(recipeTitle);
-                if (mRecipe != null) {
-                    return mRecipe.getIngredients().size();
+                if (mCursor != null) {
+                    Log.v(TAG, "[getCount]" + mCursor.getCount() + " entries");
+                    return mCursor.getCount();
+                } else {
+                    Log.w(TAG, "[getCount]Cursor null");
+                    return 0;
                 }
-                return 0;
             }
 
             @Override
             public RemoteViews getViewAt(int i) {
-                if (i == AdapterView.INVALID_POSITION || mRecipe == null) {
+                if (i == AdapterView.INVALID_POSITION || mCursor == null) {
                     return null;
                 }
                 String packageName = getPackageName();
                 RemoteViews views = new RemoteViews(packageName, ingredient);
-                RecipeContent.Recipe.Ingredient ingredient = mRecipe.getIngredients().get(i);
-                views.setTextViewText(R.id.ingredient_amount, ingredient.getQuantity() + " " + ingredient.getMeasure());
-                views.setTextViewText(R.id.ingredient_name, mRecipe.getIngredients().get(i).getName());
+
+                mCursor.moveToPosition(i);
+
+                int ingredColId = mCursor.getColumnIndexOrThrow(IngredientColumns.INGREDIENT);
+                int measureColId = mCursor.getColumnIndexOrThrow(IngredientColumns.MEASURE);
+                int amountColId = mCursor.getColumnIndexOrThrow(IngredientColumns.QUANTITY);
+                String ingredientName = mCursor.getString(ingredColId);
+                String measure = mCursor.getString(measureColId);
+                int amount = mCursor.getInt(amountColId);
+
+                views.setTextViewText(R.id.ingredient_amount, amount + " " + measure);
+                views.setTextViewText(R.id.ingredient_name, ingredientName);
 
                 return views;
             }

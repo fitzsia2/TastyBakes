@@ -36,9 +36,8 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
         RecipeContent.Recipe recipe =
                 RecipeWidgetProviderConfigureActivity.loadTitlePref(context, appWidgetId);
 
-        Log.v(TAG, "[updateWidget]Recipe: " + recipe);
-
         if (recipe != null) {
+            Log.v(TAG, "[updateWidget]Recipe: " + recipe.getTitle());
             widgetView.setTextViewText(R.id.widget_recipe_title_text_view, recipe.getTitle());
 
             Intent intent = new Intent(context, RecipeRemoteViewsService.class);

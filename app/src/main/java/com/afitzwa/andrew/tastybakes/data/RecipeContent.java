@@ -1,10 +1,9 @@
 package com.afitzwa.andrew.tastybakes.data;
 
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
-import android.content.Context;
-import android.content.OperationApplicationException;
-import android.os.RemoteException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -31,25 +30,78 @@ public class RecipeContent {
             RECIPES.add(recipe);
             RECIPE_MAP.put(recipe.getTitle(), recipe);
         }
-
     }
 
-    public void buildListFromJSONString(Context context, String s) {
-        JSONArray recipes;
+    public void buildListFromJSONString(ContentResolver contentResolver, String s) {
+        List<Recipe> recipes = buildRecipeFromJSON(s);
+
+        // Iterate through each recipe
+        for (Recipe recipe : recipes) {
+
+            Cursor c = contentResolver.query(RecipeProvider.Recipes.withName(recipe.getTitle()), null, null, null, null);
+            if (c != null) {
+                if (c.getCount() == 0) {
+
+                    // Insert to DB
+                    ContentValues recipeValues = new ContentValues();
+                    recipeValues.put(RecipeColumns.NAME, recipe.getTitle());
+                    recipeValues.put(RecipeColumns.SERVINGS, recipe.getServings());
+                    recipeValues.put(RecipeColumns.IMAGE_URL, recipe.getmImageUrl());
+                    Uri recipeUri = contentResolver.insert(RecipeProvider.Recipes.CONTENT_URI, recipeValues);
+                    assert recipeUri != null;
+
+                    // Add ingredients to DB
+                    for (Recipe.Ingredient ingredient : recipe.getIngredients()) {
+                        ContentValues ingredientValues = new ContentValues();
+                        ingredientValues.put(IngredientColumns.INGREDIENT, ingredient.getName());
+                        ingredientValues.put(IngredientColumns.MEASURE, ingredient.getMeasure());
+                        ingredientValues.put(IngredientColumns.QUANTITY, ingredient.getQuantity());
+                        ingredientValues.put(IngredientColumns.RECIPE_FK, recipeUri.getLastPathSegment());
+
+                        Uri ingredientUri = contentResolver
+                                .insert(IngredientProvider.Ingredients.CONTENT_URI, ingredientValues);
+
+                        Log.v(TAG, ingredientUri.toString());
+                    }
+
+                    // Add steps to DB
+                    for (Recipe.RecipeStep step : recipe.getSteps()) {
+                        ContentValues stepValues = new ContentValues();
+                        stepValues.put(StepColumns.DESCRIPTION, step.getDescription());
+                        stepValues.put(StepColumns.SHORT_DESC, step.getShortDesc());
+                        stepValues.put(StepColumns.THUMB_URL, step.getThumnailURL());
+                        stepValues.put(StepColumns.VIDEO_URL, step.getVideoURL());
+                        stepValues.put(StepColumns.RECIPE_FK, recipeUri.getLastPathSegment());
+
+                        Uri stepUri = contentResolver
+                                .insert(StepProvider.Steps.CONTENT_URI, stepValues);
+
+                        Log.v(TAG, stepUri.toString());
+                    }
+                }
+
+                c.close();
+            }
+            addRecipe(recipe);
+        }
+    }
+
+    private List<Recipe> buildRecipeFromJSON(String jsonString) {
+        JSONArray recipesJSONArray;
+        List<Recipe> recipeList = new ArrayList<>();
 
         try {
             // Get all the listed recipes
-            recipes = new JSONArray(s);
+            recipesJSONArray = new JSONArray(jsonString);
 
             // Iterate through each recipe
-            for (int ii = 0; ii < recipes.length(); ii++) {
+            for (int ii = 0; ii < recipesJSONArray.length(); ii++) {
 
-                JSONObject recipeJSON = (JSONObject) recipes.get(ii);
+                JSONObject recipeJSON = (JSONObject) recipesJSONArray.get(ii);
 
-                RecipeContent.Recipe recipe =
-                        new RecipeContent.Recipe(recipeJSON.getInt("id"), recipeJSON.getString("name"));
-
-                recipe.setServings(recipeJSON.getInt("servings"));
+                Recipe recipe = new RecipeContent.Recipe(recipeJSON.getInt("id"),
+                        recipeJSON.getString("name"),
+                        recipeJSON.getInt("servings"));
 
                 // Iterate through each ingredient and step of a recipe
                 JSONArray ingredientArray = recipeJSON.getJSONArray("ingredients");
@@ -80,26 +132,13 @@ public class RecipeContent {
                     recipe.addStep(step);
                 }
 
-
-                ContentProviderOperation.Builder builder =
-                        ContentProviderOperation.newUpdate(RecipeProvider.Recipes.CONTENT_URI);
-                builder.withValue(RecipeColumns.NAME, recipe.getTitle());
-                builder.withValue(RecipeColumns.SERVINGS, recipe.getServings());
-                builder.withValue(RecipeColumns.IMAGE_URL, recipe.getmImageUrl());
-
-                ArrayList<ContentProviderOperation> batchOperations = new ArrayList<ContentProviderOperation>();
-                batchOperations.add(builder.build());
-
-                ContentProviderResult[] results = context.getContentResolver()
-                        .applyBatch(RecipeProvider.AUTHORITY, batchOperations);
-
-                Log.v(TAG, "Applied " + results.length);
-
-                addRecipe(recipe);
+                recipeList.add(recipe);
             }
-        } catch (JSONException | RemoteException | OperationApplicationException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return recipeList;
     }
 
     public static class Recipe {
@@ -111,9 +150,10 @@ public class RecipeContent {
         private List<RecipeStep> mSteps = new ArrayList<>();
         private List<Ingredient> mIngredients = new ArrayList<>();
 
-        private Recipe(int id, String title) {
+        public Recipe(int id, String title, int servings) {
             this.mId = id;
             this.mTitle = title;
+            this.mServings = servings;
         }
 
         public List<RecipeStep> getSteps() {
