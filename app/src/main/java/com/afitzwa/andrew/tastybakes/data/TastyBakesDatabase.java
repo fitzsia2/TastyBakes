@@ -8,14 +8,11 @@ public class TastyBakesDatabase {
     private TastyBakesDatabase() {
     }
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
-    @Table(RecipeColumns.class)
-    public static final String RECIPES = "recipes";
+    @Table(RecipeColumns.class) public static final String RECIPES = "recipes";
 
-    @Table(IngredientColumns.class)
-    public static final String INGREDIENTS = "ingredients";
+    @Table(IngredientColumns.class) public static final String INGREDIENTS = "ingredients";
 
-    @Table(StepColumns.class)
-    public static final String STEPS = "steps";
+    @Table(StepColumns.class) public static final String STEPS = "steps";
 }
