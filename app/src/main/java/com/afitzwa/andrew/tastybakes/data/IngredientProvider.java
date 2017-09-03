@@ -32,16 +32,5 @@ public class IngredientProvider {
                 type = "vnd.android.cursor.dir/ingredients"
         )
         public static final Uri CONTENT_URI = buildUri(Path.INGREDIENTS);
-
-        @InexactContentUri(
-                name = "INGREDIENT_ID",
-                path = Path.INGREDIENTS + "/*",
-                type = "vnd.android.cursor.item/ingredients",
-                whereColumn = IngredientColumns.INGREDIENT,
-                pathSegment = 1
-        )
-        public static Uri withName(String name) {
-            return buildUri(Path.INGREDIENTS, name);
-        }
     }
 }
