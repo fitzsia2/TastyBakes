@@ -67,30 +67,15 @@ public class RecipeListActivity extends AppCompatActivity implements IFetchUrlTa
         Cursor cursor = getContentResolver().query(RecipeProvider.Recipes.CONTENT_URI, null, null, null, null);
         assert cursor != null;
 
-        List<RecipeContent.Recipe> recipeList = new ArrayList<>();
-
-        while (cursor.moveToNext()) {
-            final int idCol = cursor.getColumnIndexOrThrow(RecipeColumns._ID);
-            final int nameCol = cursor.getColumnIndexOrThrow(RecipeColumns.NAME);
-            final int servingsCol = cursor.getColumnIndexOrThrow(RecipeColumns.SERVINGS);
-            recipeList.add(
-                    new RecipeContent.Recipe(cursor.getInt(idCol),
-                            cursor.getString(nameCol),
-                            cursor.getInt(servingsCol))
-            );
-        }
-
-        cursor.close();
-
-        setupRecyclerView(mRecyclerView, recipeList);
+        setupRecyclerView(mRecyclerView, cursor);
     }
 
-    public static void setupRecyclerView(@NonNull RecyclerView recyclerView, @NonNull List<RecipeContent.Recipe> recipeList) {
+    public static void setupRecyclerView(@NonNull RecyclerView recyclerView, @NonNull Cursor cursor) {
         DividerItemDecoration dividerItemDecoration =
                 new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        recyclerView.setAdapter(new RecipeRecyclerViewAdapter(recipeList));
+        recyclerView.setAdapter(new RecipeRecyclerViewAdapter(cursor));
     }
 
     @Override

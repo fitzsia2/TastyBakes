@@ -2,14 +2,13 @@ package com.afitzwa.andrew.tastybakes;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
-
-import java.util.List;
+import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
 
 /**
  * Recycler View Adapter used for managing the list of recipes
@@ -17,10 +16,10 @@ import java.util.List;
 public class RecipeRecyclerViewAdapter
         extends RecyclerView.Adapter<RecipeViewHolder> {
 
-    private final List<RecipeContent.Recipe> RECIPES;
+    Cursor mCursor;
 
-    RecipeRecyclerViewAdapter(List<RecipeContent.Recipe> recipes) {
-        RECIPES = recipes;
+    RecipeRecyclerViewAdapter(Cursor c) {
+        mCursor = c;
     }
 
     @Override
@@ -32,9 +31,13 @@ public class RecipeRecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(final RecipeViewHolder holder, int position) {
-        holder.setRecipe(RECIPES.get(position));
-        holder.getIdView().setText(RECIPES.get(position).getTitle());
-        holder.getContentView().setText(("Serves " + RECIPES.get(position).getServings()));
+        mCursor.moveToPosition(position);
+
+        String recipeName = mCursor.getString(mCursor.getColumnIndexOrThrow(RecipeColumns.NAME));
+        int servings = mCursor.getInt(mCursor.getColumnIndexOrThrow(RecipeColumns.SERVINGS));
+
+        holder.setRecipeName(recipeName);
+        holder.setContent("Serves " + servings);
 
         holder.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,7 +45,7 @@ public class RecipeRecyclerViewAdapter
 
                 Context context = v.getContext();
                 Intent intent = new Intent(context, RecipeDetailActivity.class);
-                intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.getRecipe().getTitle());
+                intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.getRecipeName());
 
                 context.startActivity(intent);
             }
@@ -51,7 +54,6 @@ public class RecipeRecyclerViewAdapter
 
     @Override
     public int getItemCount() {
-        return RECIPES.size();
+        return mCursor.getCount();
     }
-
 }
