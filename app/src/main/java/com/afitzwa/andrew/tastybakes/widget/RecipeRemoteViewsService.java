@@ -1,6 +1,5 @@
 package com.afitzwa.andrew.tastybakes.widget;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Binder;
@@ -13,13 +12,9 @@ import com.afitzwa.andrew.tastybakes.R;
 import com.afitzwa.andrew.tastybakes.data.IngredientColumns;
 import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
 import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 
-import java.util.List;
-
 import static com.afitzwa.andrew.tastybakes.R.layout.ingredient;
-import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
 
 /**
  * Provides views for widget

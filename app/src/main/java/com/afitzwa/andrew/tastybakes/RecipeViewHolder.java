@@ -4,8 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
-
 /**
  * View holder for managing a recipe (listing recipes)
  */

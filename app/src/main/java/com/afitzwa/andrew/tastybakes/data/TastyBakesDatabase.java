@@ -8,7 +8,7 @@ public class TastyBakesDatabase {
     private TastyBakesDatabase() {
     }
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 4;
 
     @Table(RecipeColumns.class) public static final String RECIPES = "recipes";
 

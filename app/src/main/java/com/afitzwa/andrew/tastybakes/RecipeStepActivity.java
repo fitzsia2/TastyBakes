@@ -5,8 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 public class RecipeStepActivity extends AppCompatActivity {
-    public static final String ARG_RECIPE_ID = "item_id";
-    public static final String ARG_RECIPE_STEP_ID = "rec_id";
+    public static final String ARG_RECIPE_FK_ID = "recipe_fk";
+    public static final String ARG_RECIPE_STEP_ID = "step_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,7 +14,8 @@ public class RecipeStepActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_step);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -30,19 +31,18 @@ public class RecipeStepActivity extends AppCompatActivity {
             // using a fragment transaction.
             Bundle arguments = new Bundle();
 
-            arguments.putString(
-                    RecipeStepFragment.ARG_RECIPE_ID,
-                    getIntent().getStringExtra(RecipeStepActivity.ARG_RECIPE_ID)
-            );
-
             arguments.putInt(
-                    RecipeStepFragment.ARG_RECIPE_STEP_ID,
-                    getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, 0)
+                    RecipeStepFragment.ARG_STEP_ID,
+                    getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, -1)
+            );
+            arguments.putInt(
+                    RecipeStepFragment.ARG_RECIPE_FK_ID,
+                    getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, -1)
             );
 
             RecipeStepFragment fragment = new RecipeStepFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.recipe_step_container, fragment)
                     .commit();
         }

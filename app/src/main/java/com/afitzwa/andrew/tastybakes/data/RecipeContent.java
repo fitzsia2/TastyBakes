@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +20,7 @@ import java.util.Map;
 
 public class RecipeContent {
     private static final String TAG = RecipeContent.class.getSimpleName();
-    public static List<Recipe> RECIPES = new ArrayList<>();
+    public static final List<Recipe> RECIPES = new ArrayList<>();
 
     public static final Map<String, Recipe> RECIPE_MAP = new HashMap<>();
 
@@ -58,10 +57,8 @@ public class RecipeContent {
                         ingredientValues.put(IngredientColumns.QUANTITY, ingredient.getQuantity());
                         ingredientValues.put(IngredientColumns.RECIPE_FK, recipeUri.getLastPathSegment());
 
-                        Uri ingredientUri = contentResolver
-                                .insert(IngredientProvider.Ingredients.CONTENT_URI, ingredientValues);
+                        contentResolver.insert(IngredientProvider.Ingredients.CONTENT_URI, ingredientValues);
 
-                        Log.v(TAG, ingredientUri.toString());
                     }
 
                     // Add steps to DB
@@ -72,11 +69,9 @@ public class RecipeContent {
                         stepValues.put(StepColumns.THUMB_URL, step.getThumnailURL());
                         stepValues.put(StepColumns.VIDEO_URL, step.getVideoURL());
                         stepValues.put(StepColumns.RECIPE_FK, recipeUri.getLastPathSegment());
+                        stepValues.put(StepColumns.STEP_ORDER, step.getId());
 
-                        Uri stepUri = contentResolver
-                                .insert(StepProvider.Steps.CONTENT_URI, stepValues);
-
-                        Log.v(TAG, stepUri.toString());
+                        contentResolver.insert(StepProvider.Steps.CONTENT_URI, stepValues);
                     }
                 }
 
@@ -126,7 +121,8 @@ public class RecipeContent {
                             stepJSON.getString("shortDescription"),
                             stepJSON.getString("description"),
                             stepJSON.getString("videoURL"),
-                            stepJSON.getString("thumbnailURL")
+                            stepJSON.getString("thumbnailURL"),
+                            stepJSON.getInt("id")
                     );
 
                     recipe.addStep(step);
@@ -147,8 +143,8 @@ public class RecipeContent {
         private int mServings;
         private String mImageUrl;
 
-        private List<RecipeStep> mSteps = new ArrayList<>();
-        private List<Ingredient> mIngredients = new ArrayList<>();
+        private final List<RecipeStep> mSteps = new ArrayList<>();
+        private final List<Ingredient> mIngredients = new ArrayList<>();
 
         public Recipe(int id, String title, int servings) {
             this.mId = id;
@@ -204,18 +200,20 @@ public class RecipeContent {
          * Contains information about individual steps in a recipe
          */
         public static class RecipeStep {
-            private String mTitle;           // A short title for this step
-            private String mRecipeTitle;     // Name of the recipe this step belongs to
-            private String mDescription;     // Detailed description of this step
-            private String mVideoURL;        // URL for this step instructional video
-            private String mThumbnailURL;    // URL of a thumbnail for this step
+            private final String mTitle;           // A short title for this step
+            private final String mRecipeTitle;     // Name of the recipe this step belongs to
+            private final String mDescription;     // Detailed description of this step
+            private final String mVideoURL;        // URL for this step instructional video
+            private final String mThumbnailURL;    // URL of a thumbnail for this step
+            private final int mId;
 
-            private RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl) {
+            private RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl, int id) {
                 this.mRecipeTitle = recipe;
                 this.mTitle = shrtDes;
                 this.mDescription = desc;
                 this.mVideoURL = vidUrl;
                 this.mThumbnailURL = mThmUrl;
+                this.mId = id;
             }
 
             public String getRecipeTitle() {
@@ -237,15 +235,19 @@ public class RecipeContent {
             public String getThumnailURL() {
                 return mThumbnailURL;
             }
+
+            public int getId() {
+                return mId;
+            }
         }
 
         /**
          * Describes an ingredient in a recipe
          */
         public static class Ingredient {
-            private int mQuantity;
-            private String mMeasure;
-            private String mName;
+            private final int mQuantity;
+            private final String mMeasure;
+            private final String mName;
 
             private Ingredient(String name, String measure, int quantity) {
                 this.mName = name;

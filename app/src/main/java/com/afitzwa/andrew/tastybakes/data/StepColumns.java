@@ -14,6 +14,9 @@ public class StepColumns {
     @AutoIncrement
     public static final String _ID = "_id";
 
+    @DataType(DataType.Type.INTEGER) @NotNull
+    public static final String STEP_ORDER = "step_order";
+
     @DataType(DataType.Type.TEXT) @NotNull
     public static final String SHORT_DESC = "short_description";
 

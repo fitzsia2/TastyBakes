@@ -1,16 +1,25 @@
 package com.afitzwa.andrew.tastybakes;
 
+
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
-
-import butterknife.ButterKnife;
+import com.afitzwa.andrew.tastybakes.data.IngredientColumns;
+import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
+import com.afitzwa.andrew.tastybakes.data.StepColumns;
+import com.afitzwa.andrew.tastybakes.data.StepProvider;
 
 /**
  * A fragment representing a single Recipe detail screen.
@@ -18,45 +27,54 @@ import butterknife.ButterKnife;
  * in two-pane mode (on tablets) or a {@link RecipeDetailActivity}
  * on handsets.
  */
-public class RecipeDetailFragment extends Fragment {
+public class RecipeDetailFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>, ListView.OnItemClickListener {
+    IRecipeDetailFragment mCaller;
+
     private static final String TAG = RecipeDetailFragment.class.getSimpleName();
-    /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
-     */
-    public static final String ARG_ITEM_ID = "item_id";
 
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private RecipeContent.Recipe mItem;
+    public static final String ARG_RECIPE_NAME_ID = "item_id";
+    public static final String ARG_RECIPE_ROW_ID = "recipe_row_id";
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
+    private static final int CURSOR_LOADER_INGREDIENT_ID = 1;
+    private static final int CURSOR_LOADER_STEP_ID = 2;
+
+    private String mRecipeName;
+    private int mRecipeRowId;
+
+    private Context mContext;
+
+    private IngredientCursorAdapter mIngredientCursorAdapter;
+    private StepCursorAdapter mStepCursorAdapter;
+
     public RecipeDetailFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(getActivity());
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
+
+        if (getArguments().containsKey(ARG_RECIPE_NAME_ID)) {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            String key = getArguments().getString(ARG_ITEM_ID);
-            mItem = RecipeContent.RECIPE_MAP.get(key);
-            assert mItem != null;
+            mRecipeName = getArguments().getString(ARG_RECIPE_NAME_ID);
+            mRecipeRowId = getArguments().getInt(ARG_RECIPE_ROW_ID);
+        }
 
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getTitle());
+        // onAttach will not be called on APIs lower than 23, leaving mContext blank
+        if (mContext == null) {
+            mContext = getActivity().getApplicationContext();
+            try {
+                mCaller = (IRecipeDetailFragment) getActivity();
+            } catch (ClassCastException e) {
+                e.printStackTrace();
             }
         }
+
+        mIngredientCursorAdapter = new IngredientCursorAdapter(mContext, null, 0);
+        mStepCursorAdapter = new StepCursorAdapter(mContext, null, 0);
     }
 
     @Override
@@ -64,6 +82,75 @@ public class RecipeDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_detail_content, container, false);
 
+        ListView ingredientListView = rootView.findViewById(R.id.ingredient_list_view);
+        ingredientListView.setAdapter(mIngredientCursorAdapter);
+
+        ListView stepListView = rootView.findViewById(R.id.step_list_view);
+        stepListView.setAdapter(mStepCursorAdapter);
+        stepListView.setOnItemClickListener(this);
+
+        Bundle b = new Bundle();
+        b.putInt(ARG_RECIPE_ROW_ID, mRecipeRowId);
+        getLoaderManager().initLoader(CURSOR_LOADER_INGREDIENT_ID, b, this);
+        getLoaderManager().initLoader(CURSOR_LOADER_STEP_ID, b, this);
+
         return rootView;
+    }
+
+    // Only called on (> API 22)
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+        try {
+            mCaller = (IRecipeDetailFragment) mContext;
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        assert mContext != null;
+        if (i == CURSOR_LOADER_INGREDIENT_ID) {
+            return new CursorLoader(mContext,
+                    IngredientProvider.Ingredients.CONTENT_URI,
+                    null,
+                    IngredientColumns.RECIPE_FK + " = " + mRecipeRowId,
+                    null, null);
+        } else if (i == CURSOR_LOADER_STEP_ID) {
+            return new CursorLoader(mContext,
+                    StepProvider.Steps.CONTENT_URI,
+                    null,
+                    StepColumns.RECIPE_FK + " = " + mRecipeRowId,
+                    null, StepColumns.STEP_ORDER + " ASC");
+        } else {
+            Log.e(TAG, "[onCreateLoader] Invalid cursor loader id");
+            return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        if (cursorLoader.getId() == CURSOR_LOADER_INGREDIENT_ID) {
+            mIngredientCursorAdapter.swapCursor(cursor);
+        } else if (cursorLoader.getId() == CURSOR_LOADER_STEP_ID) {
+            mStepCursorAdapter.swapCursor(cursor);
+
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        if (cursorLoader.getId() == CURSOR_LOADER_INGREDIENT_ID) {
+            mIngredientCursorAdapter.swapCursor(null);
+        } else if (cursorLoader.getId() == CURSOR_LOADER_STEP_ID) {
+            mStepCursorAdapter.swapCursor(null);
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        mCaller.onStepSelected(i);
     }
 }

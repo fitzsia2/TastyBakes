@@ -24,7 +24,7 @@
             tools:listitem="@layout/ingredient" />
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/recipe_detail"
+            android:id="@+id/step_list_view"
             android:name="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

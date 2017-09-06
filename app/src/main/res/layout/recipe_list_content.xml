@@ -3,9 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:paddingBottom="8dp"
-    android:paddingTop="8dp">
+    style="@style/two_line_list_item">
 
     <ImageView
         android:id="@+id/image_preview_view"
@@ -14,25 +12,29 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/list_content_img_desc"
-        android:padding="8dp"
+        android:paddingLeft="16dp"
         android:src="@android:drawable/btn_star_big_on" />
 
-    <TextView
-        android:id="@+id/recipe_title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/image_preview_view"
-        android:layout_toRightOf="@id/image_preview_view"
-        android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="Nutella Pie" />
+        android:orientation="vertical"
+        android:paddingLeft="72dp"
+        android:layout_centerVertical="true">
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/recipe_title"
-        android:layout_toEndOf="@id/image_preview_view"
-        android:layout_toRightOf="@id/image_preview_view"
-        android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="Serves 10" />
+        <TextView
+            android:id="@+id/recipe_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="Nutella Pie" />
+
+        <TextView
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="Serves 10" />
+
+    </LinearLayout>
 </RelativeLayout>

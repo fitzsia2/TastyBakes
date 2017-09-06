@@ -38,7 +38,14 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <include layout="@layout/recipe_list" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recipe_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="LinearLayoutManager"
+            tools:listitem="@layout/recipe_list_content" />
     </FrameLayout>
 
 

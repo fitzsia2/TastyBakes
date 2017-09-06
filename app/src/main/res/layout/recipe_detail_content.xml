@@ -1,33 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="16dp">
+    android:orientation="vertical">
 
     <ListView
         android:id="@+id/ingredient_list_view"
         style="@style/Widget.AppCompat.ListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="4dp"
         android:scrollbars="none"
         tools:layout_height="196dp"
         tools:listitem="@layout/ingredient" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recipe_detail"
-        android:name="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/ingredient_list_view"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        app:layoutManager="LinearLayoutManager"
-        tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailActivity"
-        tools:listitem="@layout/recipe_step_list_content" />
+        android:layout_height="1dp"
+        android:background="@android:color/black"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp" />
 
-</RelativeLayout>
+    <ListView
+        android:id="@+id/step_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        tools:layout_height="128dp"
+        tools:listitem="@layout/detail_step_view" />
+
+</LinearLayout>

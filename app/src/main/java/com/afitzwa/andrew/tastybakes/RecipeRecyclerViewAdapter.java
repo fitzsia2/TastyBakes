@@ -16,7 +16,9 @@ import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
 public class RecipeRecyclerViewAdapter
         extends RecyclerView.Adapter<RecipeViewHolder> {
 
-    Cursor mCursor;
+    public static final String TAG = RecipeRecyclerViewAdapter.class.getSimpleName();
+
+    final Cursor mCursor;
 
     RecipeRecyclerViewAdapter(Cursor c) {
         mCursor = c;
@@ -32,6 +34,7 @@ public class RecipeRecyclerViewAdapter
     @Override
     public void onBindViewHolder(final RecipeViewHolder holder, int position) {
         mCursor.moveToPosition(position);
+        final int rowId = mCursor.getInt(mCursor.getColumnIndexOrThrow(RecipeColumns._ID));
 
         String recipeName = mCursor.getString(mCursor.getColumnIndexOrThrow(RecipeColumns.NAME));
         int servings = mCursor.getInt(mCursor.getColumnIndexOrThrow(RecipeColumns.SERVINGS));
@@ -42,10 +45,10 @@ public class RecipeRecyclerViewAdapter
         holder.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Context context = v.getContext();
                 Intent intent = new Intent(context, RecipeDetailActivity.class);
-                intent.putExtra(RecipeDetailActivity.ARG_ITEM_ID, holder.getRecipeName());
+                intent.putExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, rowId);
+                intent.putExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID, holder.getRecipeName());
 
                 context.startActivity(intent);
             }

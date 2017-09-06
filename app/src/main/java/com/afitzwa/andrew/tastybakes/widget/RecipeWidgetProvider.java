@@ -5,15 +5,10 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import com.afitzwa.andrew.tastybakes.R;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
-
-import java.util.List;
-
-import static com.afitzwa.andrew.tastybakes.widget.RecipeRemoteViewsService.RECIPE_TITLE_KEY;
 
 /**
  * Implementation of App Widget functionality.
