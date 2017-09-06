@@ -13,7 +13,7 @@ import okhttp3.Response;
  */
 
 public class FetchUrlTask extends AsyncTask<String, Void, String> {
-    private IFetchUrlTask mCaller;
+    private final IFetchUrlTask mCaller;
 
     public FetchUrlTask(IFetchUrlTask cb) {
         mCaller = cb;

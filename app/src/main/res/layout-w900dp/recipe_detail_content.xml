@@ -4,24 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recipe_detail"
-        android:name="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
-        android:layout_weight="2"
+    <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        app:layoutManager="LinearLayoutManager"
-        tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailActivity"
-        tools:listitem="@layout/recipe_step_list_content" />
+        android:layout_weight="2">
+
+        <ListView
+            android:id="@+id/ingredient_list_view"
+            style="@style/Widget.AppCompat.ListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:paddingBottom="8dp"
+            android:scrollbars="none"
+            tools:layout_height="196dp"
+            tools:listitem="@layout/ingredient" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/step_list_view"
+            android:name="com.afitzwa.andrew.tastybakes.RecipeDetailFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/ingredient_list_view"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="LinearLayoutManager"
+            tools:context="com.afitzwa.andrew.tastybakes.RecipeDetailActivity"
+            tools:listitem="@layout/recipe_step_list_content" />
+
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/recipe_step_container"
-        android:layout_weight="3"
         android:layout_width="0dp"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="3" />
 
 </LinearLayout>

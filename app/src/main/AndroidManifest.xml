@@ -41,17 +41,17 @@
         </activity>
 
         <provider
+            android:name=".data.generated.RecipeProvider"
             android:authorities="com.afitzwa.andrew.tastybakes.data.RecipeProvider"
-            android:exported="true"
-            android:name=".data.generated.RecipeProvider" />
+            android:exported="false" />
         <provider
+            android:name=".data.generated.IngredientProvider"
             android:authorities="com.afitzwa.andrew.tastybakes.data.IngredientProvider"
-            android:exported="false"
-            android:name=".data.generated.IngredientProvider" />
+            android:exported="false" />
         <provider
+            android:name=".data.generated.StepProvider"
             android:authorities="com.afitzwa.andrew.tastybakes.data.StepProvider"
-            android:exported="false"
-            android:name=".data.generated.StepProvider" />
+            android:exported="false" />
 
         <receiver android:name=".widget.RecipeWidgetProvider">
             <intent-filter>

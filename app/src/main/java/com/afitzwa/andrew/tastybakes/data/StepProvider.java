@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
-import net.simonvt.schematic.annotation.InexactContentUri;
 import net.simonvt.schematic.annotation.TableEndpoint;
 
 @ContentProvider(authority = StepProvider.AUTHORITY, database = TastyBakesDatabase.class)
@@ -32,16 +31,5 @@ public class StepProvider {
                 type = "vnd.android.cursor.dir/steps"
         )
         public static final Uri CONTENT_URI = buildUri(Path.STEPS);
-
-        @InexactContentUri(
-                name = "STEP_ID",
-                path = Path.STEPS + "/*",
-                type = "vnd.android.cursor.item/steps",
-                whereColumn = StepColumns._ID,
-                pathSegment = 1
-        )
-        public static Uri withId(Integer i) {
-            return buildUri(Path.STEPS, i.toString());
-        }
     }
 }

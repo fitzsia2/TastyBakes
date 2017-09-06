@@ -4,6 +4,7 @@ import net.simonvt.schematic.annotation.AutoIncrement;
 import net.simonvt.schematic.annotation.DataType;
 import net.simonvt.schematic.annotation.NotNull;
 import net.simonvt.schematic.annotation.PrimaryKey;
+import net.simonvt.schematic.annotation.Unique;
 
 
 public class RecipeColumns {
@@ -11,7 +12,7 @@ public class RecipeColumns {
     @AutoIncrement
     public static final String _ID = "_id";
 
-    @DataType(DataType.Type.TEXT) @NotNull
+    @DataType(DataType.Type.TEXT) @NotNull @Unique
     public static final String NAME = "name";
 
     @DataType(DataType.Type.INTEGER) @NotNull

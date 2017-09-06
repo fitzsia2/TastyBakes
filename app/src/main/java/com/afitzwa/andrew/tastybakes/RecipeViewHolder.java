@@ -4,42 +4,35 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
-
 /**
  * View holder for managing a recipe (listing recipes)
  */
 public class RecipeViewHolder extends RecyclerView.ViewHolder {
 
     private final View mView;
-    private final TextView mIdView;
+    private final TextView mRecipeNameView;
     private final TextView mContentView;
-    private RecipeContent.Recipe mRecipe;
-
-    public TextView getIdView() {
-        return mIdView;
-    }
 
     public View getView() {
         return mView;
     }
 
-    public TextView getContentView() {
-        return mContentView;
+    public String getRecipeName() {
+        return (String) mRecipeNameView.getText();
     }
 
-    public RecipeContent.Recipe getRecipe() {
-        return mRecipe;
+    public void setRecipeName(String name) {
+        mRecipeNameView.setText(name);
     }
 
-    public void setRecipe(RecipeContent.Recipe mRecipe) {
-        this.mRecipe = mRecipe;
+    public void setContent(String content) {
+        mContentView.setText(content);
     }
 
     RecipeViewHolder(View view) {
         super(view);
         mView = view;
-        mIdView = view.findViewById(R.id.recipe_title);
+        mRecipeNameView = view.findViewById(R.id.recipe_title);
         mContentView = view.findViewById(R.id.content);
     }
 }

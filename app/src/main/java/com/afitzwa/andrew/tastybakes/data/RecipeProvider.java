@@ -34,14 +34,14 @@ public class RecipeProvider {
         public static final Uri CONTENT_URI = buildUri(Path.NAMES);
 
         @InexactContentUri(
-                name = "NAME_ID",
+                name = "RECIPE",
                 path = Path.NAMES + "/*",
-                type = "vnd.android.cursor.item/quotes",
+                type = "vnd.android.cursor.item/recipes",
                 whereColumn = RecipeColumns.NAME,
                 pathSegment = 1
         )
-        public static Uri withSymbol(String symbol) {
-            return buildUri(Path.NAMES, symbol);
+        public static Uri withName(String id) {
+            return buildUri(Path.NAMES, id);
         }
     }
 }

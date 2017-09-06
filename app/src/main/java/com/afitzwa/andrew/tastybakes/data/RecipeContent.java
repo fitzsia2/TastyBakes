@@ -1,11 +1,9 @@
 package com.afitzwa.andrew.tastybakes.data;
 
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
-import android.content.Context;
-import android.content.OperationApplicationException;
-import android.os.RemoteException;
-import android.util.Log;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +20,7 @@ import java.util.Map;
 
 public class RecipeContent {
     private static final String TAG = RecipeContent.class.getSimpleName();
-    public static List<Recipe> RECIPES = new ArrayList<>();
+    public static final List<Recipe> RECIPES = new ArrayList<>();
 
     public static final Map<String, Recipe> RECIPE_MAP = new HashMap<>();
 
@@ -31,25 +29,74 @@ public class RecipeContent {
             RECIPES.add(recipe);
             RECIPE_MAP.put(recipe.getTitle(), recipe);
         }
-
     }
 
-    public void buildListFromJSONString(Context context, String s) {
-        JSONArray recipes;
+    public void buildListFromJSONString(ContentResolver contentResolver, String s) {
+        List<Recipe> recipes = buildRecipeFromJSON(s);
+
+        // Iterate through each recipe
+        for (Recipe recipe : recipes) {
+
+            Cursor c = contentResolver.query(RecipeProvider.Recipes.withName(recipe.getTitle()), null, null, null, null);
+            if (c != null) {
+                if (c.getCount() == 0) {
+
+                    // Insert to DB
+                    ContentValues recipeValues = new ContentValues();
+                    recipeValues.put(RecipeColumns.NAME, recipe.getTitle());
+                    recipeValues.put(RecipeColumns.SERVINGS, recipe.getServings());
+                    recipeValues.put(RecipeColumns.IMAGE_URL, recipe.getmImageUrl());
+                    Uri recipeUri = contentResolver.insert(RecipeProvider.Recipes.CONTENT_URI, recipeValues);
+                    assert recipeUri != null;
+
+                    // Add ingredients to DB
+                    for (Recipe.Ingredient ingredient : recipe.getIngredients()) {
+                        ContentValues ingredientValues = new ContentValues();
+                        ingredientValues.put(IngredientColumns.INGREDIENT, ingredient.getName());
+                        ingredientValues.put(IngredientColumns.MEASURE, ingredient.getMeasure());
+                        ingredientValues.put(IngredientColumns.QUANTITY, ingredient.getQuantity());
+                        ingredientValues.put(IngredientColumns.RECIPE_FK, recipeUri.getLastPathSegment());
+
+                        contentResolver.insert(IngredientProvider.Ingredients.CONTENT_URI, ingredientValues);
+
+                    }
+
+                    // Add steps to DB
+                    for (Recipe.RecipeStep step : recipe.getSteps()) {
+                        ContentValues stepValues = new ContentValues();
+                        stepValues.put(StepColumns.DESCRIPTION, step.getDescription());
+                        stepValues.put(StepColumns.SHORT_DESC, step.getShortDesc());
+                        stepValues.put(StepColumns.THUMB_URL, step.getThumnailURL());
+                        stepValues.put(StepColumns.VIDEO_URL, step.getVideoURL());
+                        stepValues.put(StepColumns.RECIPE_FK, recipeUri.getLastPathSegment());
+                        stepValues.put(StepColumns.STEP_ORDER, step.getId());
+
+                        contentResolver.insert(StepProvider.Steps.CONTENT_URI, stepValues);
+                    }
+                }
+
+                c.close();
+            }
+            addRecipe(recipe);
+        }
+    }
+
+    private List<Recipe> buildRecipeFromJSON(String jsonString) {
+        JSONArray recipesJSONArray;
+        List<Recipe> recipeList = new ArrayList<>();
 
         try {
             // Get all the listed recipes
-            recipes = new JSONArray(s);
+            recipesJSONArray = new JSONArray(jsonString);
 
             // Iterate through each recipe
-            for (int ii = 0; ii < recipes.length(); ii++) {
+            for (int ii = 0; ii < recipesJSONArray.length(); ii++) {
 
-                JSONObject recipeJSON = (JSONObject) recipes.get(ii);
+                JSONObject recipeJSON = (JSONObject) recipesJSONArray.get(ii);
 
-                RecipeContent.Recipe recipe =
-                        new RecipeContent.Recipe(recipeJSON.getInt("id"), recipeJSON.getString("name"));
-
-                recipe.setServings(recipeJSON.getInt("servings"));
+                Recipe recipe = new RecipeContent.Recipe(recipeJSON.getInt("id"),
+                        recipeJSON.getString("name"),
+                        recipeJSON.getInt("servings"));
 
                 // Iterate through each ingredient and step of a recipe
                 JSONArray ingredientArray = recipeJSON.getJSONArray("ingredients");
@@ -74,32 +121,20 @@ public class RecipeContent {
                             stepJSON.getString("shortDescription"),
                             stepJSON.getString("description"),
                             stepJSON.getString("videoURL"),
-                            stepJSON.getString("thumbnailURL")
+                            stepJSON.getString("thumbnailURL"),
+                            stepJSON.getInt("id")
                     );
 
                     recipe.addStep(step);
                 }
 
-
-                ContentProviderOperation.Builder builder =
-                        ContentProviderOperation.newUpdate(RecipeProvider.Recipes.CONTENT_URI);
-                builder.withValue(RecipeColumns.NAME, recipe.getTitle());
-                builder.withValue(RecipeColumns.SERVINGS, recipe.getServings());
-                builder.withValue(RecipeColumns.IMAGE_URL, recipe.getmImageUrl());
-
-                ArrayList<ContentProviderOperation> batchOperations = new ArrayList<ContentProviderOperation>();
-                batchOperations.add(builder.build());
-
-                ContentProviderResult[] results = context.getContentResolver()
-                        .applyBatch(RecipeProvider.AUTHORITY, batchOperations);
-
-                Log.v(TAG, "Applied " + results.length);
-
-                addRecipe(recipe);
+                recipeList.add(recipe);
             }
-        } catch (JSONException | RemoteException | OperationApplicationException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return recipeList;
     }
 
     public static class Recipe {
@@ -108,12 +143,13 @@ public class RecipeContent {
         private int mServings;
         private String mImageUrl;
 
-        private List<RecipeStep> mSteps = new ArrayList<>();
-        private List<Ingredient> mIngredients = new ArrayList<>();
+        private final List<RecipeStep> mSteps = new ArrayList<>();
+        private final List<Ingredient> mIngredients = new ArrayList<>();
 
-        private Recipe(int id, String title) {
+        public Recipe(int id, String title, int servings) {
             this.mId = id;
             this.mTitle = title;
+            this.mServings = servings;
         }
 
         public List<RecipeStep> getSteps() {
@@ -164,18 +200,20 @@ public class RecipeContent {
          * Contains information about individual steps in a recipe
          */
         public static class RecipeStep {
-            private String mTitle;           // A short title for this step
-            private String mRecipeTitle;     // Name of the recipe this step belongs to
-            private String mDescription;     // Detailed description of this step
-            private String mVideoURL;        // URL for this step instructional video
-            private String mThumbnailURL;    // URL of a thumbnail for this step
+            private final String mTitle;           // A short title for this step
+            private final String mRecipeTitle;     // Name of the recipe this step belongs to
+            private final String mDescription;     // Detailed description of this step
+            private final String mVideoURL;        // URL for this step instructional video
+            private final String mThumbnailURL;    // URL of a thumbnail for this step
+            private final int mId;
 
-            private RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl) {
+            private RecipeStep(String recipe, String shrtDes, String desc, String vidUrl, String mThmUrl, int id) {
                 this.mRecipeTitle = recipe;
                 this.mTitle = shrtDes;
                 this.mDescription = desc;
                 this.mVideoURL = vidUrl;
                 this.mThumbnailURL = mThmUrl;
+                this.mId = id;
             }
 
             public String getRecipeTitle() {
@@ -197,15 +235,19 @@ public class RecipeContent {
             public String getThumnailURL() {
                 return mThumbnailURL;
             }
+
+            public int getId() {
+                return mId;
+            }
         }
 
         /**
          * Describes an ingredient in a recipe
          */
         public static class Ingredient {
-            private int mQuantity;
-            private String mMeasure;
-            private String mName;
+            private final int mQuantity;
+            private final String mMeasure;
+            private final String mName;
 
             private Ingredient(String name, String measure, int quantity) {
                 this.mName = name;
