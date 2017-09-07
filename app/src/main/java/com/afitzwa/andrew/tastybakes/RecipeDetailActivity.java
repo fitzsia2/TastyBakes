@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +32,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
+    private static final String TWO_PANE_ID = "isTwoPane";
     private boolean mTwoPane;
 
     @Override
@@ -38,12 +40,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
 
-        ButterKnife.bind(this);
-
-        String recipeName = getIntent().getStringExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID);
-        mRecipeRowId = getIntent().getIntExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, -1);
-
         if (savedInstanceState == null) {
+            ButterKnife.bind(this);
+
+            String recipeName = getIntent().getStringExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID);
+            mRecipeRowId = getIntent().getIntExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, -1);
+
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
@@ -54,19 +56,59 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
             RecipeDetailFragment fragment = new RecipeDetailFragment();
             fragment.setArguments(arguments);
 
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.recipe_detail_content, fragment, null)
-                    .commit();
-        }
+            Log.v(TAG, "[onCreate] Replacing fragment");
 
-        mToolbar.setTitle(recipeName);
+            getFragmentManager().beginTransaction()
+                    .add(R.id.detail_fragment_container, fragment)
+                    .commit();
+
+            if (findViewById(R.id.step_fragment_container) != null) {
+                mTwoPane = true;
+                Log.v(TAG, "two panes");
+                Bundle stepArgs = new Bundle();
+                stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeRowId);
+                stepArgs.putInt(RecipeStepFragment.ARG_STEP_ID, 0);
+
+                RecipeStepFragment stepFragment = new RecipeStepFragment();
+                stepFragment.setArguments(stepArgs);
+
+                getFragmentManager().beginTransaction()
+                        .add(R.id.step_fragment_container, stepFragment)
+                        .commit();
+            }
+
+            mToolbar.setTitle(recipeName);
+        } else {
+            mTwoPane = savedInstanceState.getBoolean(TWO_PANE_ID);
+        }
     }
 
     @Override
     public void onStepSelected(int stepRowId) {
-        Intent intent = new Intent(this, RecipeStepActivity.class);
-        intent.putExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, mRecipeRowId);
-        intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, stepRowId);
-        this.startActivity(intent);
+        Log.v(TAG, "[onStepSelected] recipeId:" + mRecipeRowId + " row:" + stepRowId);
+        if (mTwoPane) {
+            Bundle stepArgs = new Bundle();
+            stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeRowId);
+            stepArgs.putInt(RecipeStepFragment.ARG_STEP_ID, stepRowId);
+
+            RecipeStepFragment stepFragment = new RecipeStepFragment();
+            stepFragment.setArguments(stepArgs);
+
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.step_fragment_container, stepFragment)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, RecipeStepActivity.class);
+            intent.putExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, mRecipeRowId);
+            intent.putExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, stepRowId);
+            this.startActivity(intent);
+
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(TWO_PANE_ID, mTwoPane);
     }
 }

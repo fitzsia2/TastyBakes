@@ -1,7 +1,6 @@
 package com.afitzwa.andrew.tastybakes;
 
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -39,7 +38,6 @@ public class RecipeDetailFragment extends Fragment
     private static final int CURSOR_LOADER_INGREDIENT_ID = 1;
     private static final int CURSOR_LOADER_STEP_ID = 2;
 
-    private String mRecipeName;
     private int mRecipeRowId;
 
     private Context mContext;
@@ -56,10 +54,6 @@ public class RecipeDetailFragment extends Fragment
 
 
         if (getArguments().containsKey(ARG_RECIPE_NAME_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mRecipeName = getArguments().getString(ARG_RECIPE_NAME_ID);
             mRecipeRowId = getArguments().getInt(ARG_RECIPE_ROW_ID);
         }
 

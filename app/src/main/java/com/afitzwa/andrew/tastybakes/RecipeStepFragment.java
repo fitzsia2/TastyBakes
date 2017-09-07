@@ -86,6 +86,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         mContext = inflater.getContext();
 
         if (bundle != null) {
+            Log.v(TAG, "[onCreate] fk(" + bundle.getInt(ARG_RECIPE_FK_ID, -1) + ") row(" + bundle.getInt(ARG_STEP_ID, -1) + ")");
             Bundle loaderBundle = new Bundle(bundle);
 
             getLoaderManager().initLoader(0, loaderBundle, this);
@@ -206,6 +207,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         int recipeFK = args.getInt(ARG_RECIPE_FK_ID, -1);
         int stepId = args.getInt(ARG_STEP_ID);
+        Log.v(TAG, "[onCreateLoader] recipeId:" + recipeFK + " stepId:" + stepId);
         return new CursorLoader(mContext,
                 StepProvider.Steps.CONTENT_URI,
                 null,
