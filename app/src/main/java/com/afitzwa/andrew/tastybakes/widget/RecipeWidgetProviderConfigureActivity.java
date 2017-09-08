@@ -1,49 +1,42 @@
 package com.afitzwa.andrew.tastybakes.widget;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
+import android.view.ViewGroup;
 
 import com.afitzwa.andrew.tastybakes.R;
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
+import com.afitzwa.andrew.tastybakes.RecipeViewHolder;
+import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
+import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 
-import static com.afitzwa.andrew.tastybakes.data.RecipeContent.RECIPE_MAP;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * The configuration screen for the {@link RecipeWidgetProvider RecipeWidgetProvider} AppWidget.
  */
-public class RecipeWidgetProviderConfigureActivity extends Activity {
+public class RecipeWidgetProviderConfigureActivity extends Activity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = RecipeWidgetProviderConfigureActivity.class.getSimpleName();
 
     private static final String PREFS_NAME = "com.afitzwa.andrew.tastybakes.widget.RecipeWidgetProvider";
     private static final String PREF_PREFIX_KEY = "appwidget_";
+
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetText;
 
-    final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            final Context context = RecipeWidgetProviderConfigureActivity.this;
-
-            // When the button is clicked, store the string locally
-            String widgetText = RecipeContent.RECIPES.get(0).getTitle();
-            saveTitlePref(context, mAppWidgetId, widgetText);
-
-            // It is the responsibility of the configuration activity to update the app widget
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            RecipeWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId);
-
-            // Make sure we pass back the original appWidgetId
-            Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-            setResult(RESULT_OK, resultValue);
-            finish();
-        }
-    };
+    @BindView(R.id.widget_config_recipe_list) RecyclerView mRecyclerView;
 
     public RecipeWidgetProviderConfigureActivity() {
         super();
@@ -58,14 +51,9 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
 
     // Read the prefix from the SharedPreferences object for this widget.
     // If there is no preference saved, get the default from a resource
-    static RecipeContent.Recipe loadTitlePref(Context context, int appWidgetId) {
+    static String loadTitlePref(Context context, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
-        if (titleValue != null) {
-            return RECIPE_MAP.get(titleValue);
-        } else {
-            return null;
-        }
+        return prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
     }
 
     static void deleteTitlePref(Context context, int appWidgetId) {
@@ -83,8 +71,10 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.recipe_widget_provider_configure);
-        mAppWidgetText = findViewById(R.id.appwidget_text);
-        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
+
+        ButterKnife.bind(this);
+
+        mRecyclerView.setAdapter(null);
 
         // Find the widget id from the intent.
         Intent intent = getIntent();
@@ -100,12 +90,75 @@ public class RecipeWidgetProviderConfigureActivity extends Activity {
             return;
         }
 
-        RecipeContent.Recipe recipe = loadTitlePref(RecipeWidgetProviderConfigureActivity.this, mAppWidgetId);
-
-        if(recipe != null) {
-            mAppWidgetText.setText(recipe.getTitle());
-        }
+        getLoaderManager().initLoader(0, null, this);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(this, RecipeProvider.Recipes.CONTENT_URI, null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mRecyclerView.setAdapter(new RecipeListRVAdapter(data));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mRecyclerView.setAdapter(null);
+    }
+
+    private class RecipeListRVAdapter extends RecyclerView.Adapter<RecipeViewHolder> {
+
+        private Cursor mCursor;
+
+        private RecipeListRVAdapter(Cursor cursor) {
+            mCursor = cursor;
+        }
+
+        @Override
+        public RecipeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recipe_list_content, parent, false);
+            return new RecipeViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(final RecipeViewHolder holder, int position) {
+            mCursor.moveToPosition(position);
+
+            final String recipeTitle = mCursor.getString(mCursor.getColumnIndexOrThrow(
+                    RecipeColumns.NAME));
+
+            holder.setRecipeName(recipeTitle);
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    final Context context = RecipeWidgetProviderConfigureActivity.this;
+
+                    Log.v(TAG, "[onBindViewHolder.setOnClickListener] recipe: " + recipeTitle);
+
+                    saveTitlePref(context, mAppWidgetId, recipeTitle);
+
+                    // It is the responsibility of the configuration activity to update the app widget
+                    AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                    RecipeWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+
+                    // Make sure we pass back the original appWidgetId
+                    Intent resultValue = new Intent();
+                    resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                    setResult(RESULT_OK, resultValue);
+                    finish();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mCursor.getCount();
+        }
+    }
 }
 

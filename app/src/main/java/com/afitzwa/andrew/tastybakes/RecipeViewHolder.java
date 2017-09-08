@@ -29,7 +29,7 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder {
         mContentView.setText(content);
     }
 
-    RecipeViewHolder(View view) {
+    public RecipeViewHolder(View view) {
         super(view);
         mView = view;
         mRecipeNameView = view.findViewById(R.id.recipe_title);

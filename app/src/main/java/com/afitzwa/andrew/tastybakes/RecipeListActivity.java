@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
 import com.afitzwa.andrew.tastybakes.data.RecipeContent;
@@ -32,7 +33,7 @@ import butterknife.ButterKnife;
  * item details side-by-side using two vertical panes.
  */
 public class RecipeListActivity extends AppCompatActivity
-        implements IFetchUrlTask, android.app.LoaderManager.LoaderCallbacks<Cursor> {
+        implements IFetchUrlTask, ISaveRecipesToDBTask, android.app.LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = RecipeListActivity.class.getSimpleName();
     private static final String RECIPE_URL = "http://go.udacity.com/android-baking-app-json";
 
@@ -41,6 +42,8 @@ public class RecipeListActivity extends AppCompatActivity
     @BindView(R.id.recipe_list) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
 
+    Cursor mRecipesCursor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +51,10 @@ public class RecipeListActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
 
-        mRecyclerView.setAdapter(null);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        mRecipesCursor = getContentResolver().query(RecipeProvider.Recipes.CONTENT_URI, null, null, null, null);
+        mRecyclerView.setAdapter(new RecipeRecyclerViewAdapter(mRecipesCursor));
 
         setSupportActionBar(mToolbar);
 
@@ -58,16 +63,15 @@ public class RecipeListActivity extends AppCompatActivity
     }
 
     public void handleFetchUrlResult(String result) {
-        RecipeContent recipeContent = new RecipeContent();
-        recipeContent.buildListFromJSONString(getContentResolver(), result);
-
-        getLoaderManager().initLoader(ARG_RECIPE_LOADER_ID, null, this);
+        Log.v(TAG, "[handleFetchUrlResult]");
+        SaveRecipesToDBTask saveRecipesToDBTask = new SaveRecipesToDBTask(this, this);
+        saveRecipesToDBTask.execute(result);
 
         // Alert any widgets that we've updated recipes
-        Intent intent = new Intent(this, RecipeWidgetProvider.class)
-                .setPackage(this.getPackageName());
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        this.sendBroadcast(intent);
+//        Intent intent = new Intent(this, RecipeWidgetProvider.class)
+//                .setPackage(this.getPackageName());
+//        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+//        this.sendBroadcast(intent);
     }
 
     @Override
@@ -76,6 +80,8 @@ public class RecipeListActivity extends AppCompatActivity
         contentResolver.delete(RecipeProvider.Recipes.CONTENT_URI, null, null);
         contentResolver.delete(IngredientProvider.Ingredients.CONTENT_URI, null, null);
         contentResolver.delete(StepProvider.Steps.CONTENT_URI, null, null);
+        if (mRecipesCursor != null)
+            mRecipesCursor.close();
         super.onDestroy();
     }
 
@@ -86,11 +92,20 @@ public class RecipeListActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.v(TAG, "[onLoadFinished]");
         mRecyclerView.setAdapter(new RecipeRecyclerViewAdapter(cursor));
     }
 
     @Override
     public void onLoaderReset(android.content.Loader<Cursor> loader) {
         mRecyclerView.setAdapter(null);
+    }
+
+
+    // Called by SaveRecipesToDBTask
+    @Override
+    public void notifyNewData() {
+        Log.v(TAG, "{notifyNewData]");
+        getLoaderManager().initLoader(ARG_RECIPE_LOADER_ID, null, this);
     }
 }

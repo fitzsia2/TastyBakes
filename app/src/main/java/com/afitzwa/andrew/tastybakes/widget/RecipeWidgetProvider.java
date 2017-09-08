@@ -20,6 +20,7 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
+        Log.v(TAG, "[updateAppWidget]");
 
         String packageName = context.getPackageName();
         RemoteViews widgetView =
@@ -28,15 +29,15 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
         widgetView.setEmptyView(R.id.widget_ingredient_list, R.id.widget_ingredient_empty_view);
 
-        RecipeContent.Recipe recipe =
+        String recipe =
                 RecipeWidgetProviderConfigureActivity.loadTitlePref(context, appWidgetId);
 
         if (recipe != null) {
-            Log.v(TAG, "[updateWidget]Recipe: " + recipe.getTitle());
-            widgetView.setTextViewText(R.id.widget_recipe_title_text_view, recipe.getTitle());
+            Log.v(TAG, "[updateWidget]Recipe: " + recipe);
+            widgetView.setTextViewText(R.id.widget_recipe_title_text_view, recipe);
 
             Intent intent = new Intent(context, RecipeRemoteViewsService.class);
-            intent.putExtra(RecipeRemoteViewsService.RECIPE_TITLE_KEY, recipe.getTitle());
+            intent.putExtra(RecipeRemoteViewsService.RECIPE_TITLE_KEY, recipe);
             widgetView.setRemoteAdapter(R.id.widget_ingredient_list, intent);
         }
 
