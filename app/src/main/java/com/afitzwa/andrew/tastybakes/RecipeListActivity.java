@@ -1,9 +1,7 @@
 package com.afitzwa.andrew.tastybakes;
 
-import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -14,12 +12,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 import com.afitzwa.andrew.tastybakes.data.StepProvider;
 import com.afitzwa.andrew.tastybakes.network.FetchUrlTask;
 import com.afitzwa.andrew.tastybakes.network.IFetchUrlTask;
-import com.afitzwa.andrew.tastybakes.widget.RecipeWidgetProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -105,7 +101,9 @@ public class RecipeListActivity extends AppCompatActivity
     // Called by SaveRecipesToDBTask
     @Override
     public void notifyNewData() {
-        Log.v(TAG, "{notifyNewData]");
+        Log.v(TAG, "[notifyNewData]");
         getLoaderManager().initLoader(ARG_RECIPE_LOADER_ID, null, this);
+
+        // TODO update widget
     }
 }

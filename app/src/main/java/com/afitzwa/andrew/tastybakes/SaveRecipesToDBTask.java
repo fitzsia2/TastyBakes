@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import com.afitzwa.andrew.tastybakes.data.IngredientColumns;
 import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
 import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
 import com.afitzwa.andrew.tastybakes.data.StepColumns;
 import com.afitzwa.andrew.tastybakes.data.StepProvider;

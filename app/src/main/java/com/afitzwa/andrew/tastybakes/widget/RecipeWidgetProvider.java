@@ -8,7 +8,6 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.afitzwa.andrew.tastybakes.R;
-import com.afitzwa.andrew.tastybakes.data.RecipeContent;
 
 /**
  * Implementation of App Widget functionality.
