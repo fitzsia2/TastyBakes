@@ -66,10 +66,6 @@ public class RecipeListActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        ContentResolver contentResolver = getContentResolver();
-        contentResolver.delete(RecipeProvider.Recipes.CONTENT_URI, null, null);
-        contentResolver.delete(IngredientProvider.Ingredients.CONTENT_URI, null, null);
-        contentResolver.delete(StepProvider.Steps.CONTENT_URI, null, null);
         if (mRecipesCursor != null)
             mRecipesCursor.close();
         super.onDestroy();
