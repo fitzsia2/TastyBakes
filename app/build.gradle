@@ -19,19 +19,24 @@ android {
     }
 }
 
+//dependencies
+ext {
+    junitVersion = '4.12'
+    espressoVersion = '2.2.2'
+    supportLibraryVersion = '26.0.2'
+}
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 
+    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    compile "com.android.support:support-v4:$supportLibraryVersion"
+    compile "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    compile "com.android.support:design:$supportLibraryVersion"
 
+    compile "com.android.support.test.espresso:espresso-idling-resource:$espressoVersion"
 
-
-    compile 'com.android.support:appcompat-v7:26.0.0'
-    compile 'com.android.support:support-v4:26.0.0'
-    compile 'com.android.support:recyclerview-v7:26.0.0'
-    compile 'com.android.support:design:26.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     compile 'com.google.android.exoplayer:exoplayer:r2.5.1'
@@ -48,4 +53,18 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
 
     testCompile 'junit:junit:4.12'
+    androidTestCompile("com.android.support.test.espresso:espresso-core:$espressoVersion", {
+        exclude module: 'support-annotations'
+    },
+    )
+    androidTestCompile("com.android.support.test.espresso:espresso-intents:$espressoVersion", {
+        exclude module: 'support-annotations'
+    })
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2') {
+        // Necessary to avoid version conflicts
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude module: 'recyclerview-v7'
+    }
 }
