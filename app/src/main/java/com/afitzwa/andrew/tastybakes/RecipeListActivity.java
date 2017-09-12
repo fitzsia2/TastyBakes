@@ -1,7 +1,8 @@
 package com.afitzwa.andrew.tastybakes;
 
-import android.content.ContentResolver;
+import android.appwidget.AppWidgetManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -11,11 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
 import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
-import com.afitzwa.andrew.tastybakes.data.StepProvider;
 import com.afitzwa.andrew.tastybakes.network.FetchUrlTask;
 import com.afitzwa.andrew.tastybakes.network.IFetchUrlTask;
+import com.afitzwa.andrew.tastybakes.widget.RecipeWidgetProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,7 +38,7 @@ public class RecipeListActivity extends AppCompatActivity
     @BindView(R.id.recipe_list) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
 
-    Cursor mRecipesCursor;
+    private Cursor mRecipesCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +62,6 @@ public class RecipeListActivity extends AppCompatActivity
         Log.v(TAG, "[handleFetchUrlResult]");
         SaveRecipesToDBTask saveRecipesToDBTask = new SaveRecipesToDBTask(this, this);
         saveRecipesToDBTask.execute(result);
-
-        // Alert any widgets that we've updated recipes
-//        Intent intent = new Intent(this, RecipeWidgetProvider.class)
-//                .setPackage(this.getPackageName());
-//        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-//        this.sendBroadcast(intent);
     }
 
     @Override
@@ -102,8 +96,13 @@ public class RecipeListActivity extends AppCompatActivity
     @Override
     public void notifyNewData() {
         Log.v(TAG, "[notifyNewData]");
+
         getLoaderManager().initLoader(ARG_RECIPE_LOADER_ID, null, this);
 
-        // TODO update widget
+        // Alert any widgets that we've updated recipes
+        Intent intent = new Intent(this, RecipeWidgetProvider.class)
+                .setPackage(this.getPackageName());
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        this.sendBroadcast(intent);
     }
 }
