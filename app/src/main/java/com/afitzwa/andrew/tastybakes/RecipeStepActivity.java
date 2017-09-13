@@ -3,15 +3,21 @@ package com.afitzwa.andrew.tastybakes;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
-public class RecipeStepActivity extends AppCompatActivity {
+public class RecipeStepActivity extends AppCompatActivity implements IRecipeStepFragment {
+    private static final String TAG = RecipeStepActivity.class.getSimpleName();
+
     public static final String ARG_RECIPE_FK_ID = "recipe_fk";
     public static final String ARG_RECIPE_STEP_ID = "step_id";
+
+    private int mRecipeFK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
@@ -31,14 +37,13 @@ public class RecipeStepActivity extends AppCompatActivity {
             // using a fragment transaction.
             Bundle arguments = new Bundle();
 
-            arguments.putInt(
-                    RecipeStepFragment.ARG_STEP_ID,
-                    getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, -1)
-            );
-            arguments.putInt(
-                    RecipeStepFragment.ARG_RECIPE_FK_ID,
-                    getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, -1)
-            );
+            int stepId = getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, -1);
+            mRecipeFK = getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, -1);
+
+            Log.v(TAG, "[onCreate] fk:" + mRecipeFK + " step:" + stepId);
+
+            arguments.putInt(RecipeStepFragment.ARG_STEP_ID, stepId);
+            arguments.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeFK);
 
             RecipeStepFragment fragment = new RecipeStepFragment();
             fragment.setArguments(arguments);
@@ -46,5 +51,23 @@ public class RecipeStepActivity extends AppCompatActivity {
                     .replace(R.id.recipe_step_container, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    public void onStepNavigation(int stepId) {
+        // Create the detail fragment and add it to the activity
+        // using a fragment transaction.
+        Bundle arguments = new Bundle();
+
+        Log.v(TAG, "[onStepNavigation] fk:" + mRecipeFK + " step:" + stepId);
+
+        arguments.putInt(RecipeStepFragment.ARG_STEP_ID, stepId);
+        arguments.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeFK);
+
+        RecipeStepFragment fragment = new RecipeStepFragment();
+        fragment.setArguments(arguments);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.recipe_step_container, fragment)
+                .commit();
     }
 }

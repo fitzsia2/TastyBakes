@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
  * item details are presented side-by-side with a list of items
  * in a {@link RecipeListActivity}.
  */
-public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDetailFragment {
+public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDetailFragment, IRecipeStepFragment {
 
     private static final String TAG = RecipeDetailActivity.class.getSimpleName();
 
@@ -104,6 +104,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
             this.startActivity(intent);
 
         }
+    }
+
+    @Override
+    public void onStepNavigation(int stepId) {
+        onStepSelected(stepId);
     }
 
     @Override

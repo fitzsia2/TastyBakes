@@ -10,11 +10,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.afitzwa.andrew.tastybakes.data.StepColumns;
@@ -49,11 +51,16 @@ import static android.view.View.GONE;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceEventListener, LoaderManager.LoaderCallbacks<Cursor> {
-
+public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceEventListener,
+        LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
     private static final String TAG = RecipeStepFragment.class.getSimpleName();
 
+    private static final String SAVE_STATE_POSITION = "video_position";
+    private static final String SAVE_STATE_RECIPE_FK = "recipe_fk";
+    private static final String SAVE_STATE_STEP_ID = "step_id";
+
     public static final String ARG_RECIPE_FK_ID = "recipe_fk_id";
+
     public static final String ARG_STEP_ID = "step_id";
 
     final static boolean PLAY_WHEN_READY = true;
@@ -65,50 +72,148 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     private DefaultTrackSelector mTrackSelector;
     private MediaSource mMediaSource;
     private DataSource.Factory mediaDataSourceFactory;
-    private int positionMs;
+    private long mPosition;
 
     private Context mContext;
+    private IRecipeStepFragment mCaller;
+    private int mStepNum;
+    private int mRecipeFk;
+
+    String mDescription;
+    String mShortDescription;
+    String mVideoUrl;
+    String mThumbnailUrl;
 
     @BindView(R.id.recipe_step_detail) TextView mStepDescriptionView;
     @BindView(R.id.player_view) SimpleExoPlayerView mSimpleExoPlayerView;
+    @BindView(R.id.next_button) Button mNextButtonView;
+    @BindView(R.id.previous_button) Button mPrevButtonView;
 
     public RecipeStepFragment() {
+    }
+
+    // Only called on (> API 22)
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        setupInterface(context);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.v(TAG, "[onCreate]");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_step, container, false);
+
         ButterKnife.bind(this, view);
+
+        Log.v(TAG, "[onCreateView]");
+
+        mNextButtonView.setOnClickListener(this);
+        mPrevButtonView.setOnClickListener(this);
 
         Bundle bundle = getArguments();
 
         mContext = inflater.getContext();
 
+        if (savedInstanceState != null) {
+            mPosition = savedInstanceState.getLong(SAVE_STATE_POSITION);
+            mRecipeFk = savedInstanceState.getInt(SAVE_STATE_RECIPE_FK);
+            mStepNum = savedInstanceState.getInt(SAVE_STATE_STEP_ID);
+        } else {
+            mPosition = 0;
+        }
+
+        if (mCaller == null) {
+            setupInterface(mContext);
+        }
+
         if (bundle != null) {
-            Log.v(TAG, "[onCreate] fk(" + bundle.getInt(ARG_RECIPE_FK_ID, -1) + ") row(" + bundle.getInt(ARG_STEP_ID, -1) + ")");
-            Bundle loaderBundle = new Bundle(bundle);
+            Log.v(TAG, "[onCreateView] fk(" + bundle.getInt(ARG_RECIPE_FK_ID, -1) + ") row(" + bundle.getInt(ARG_STEP_ID, -1) + ")");
 
-            getLoaderManager().initLoader(0, loaderBundle, this);
+            mRecipeFk = bundle.getInt(ARG_RECIPE_FK_ID, -1);
+            mStepNum = bundle.getInt(ARG_STEP_ID, -1);
+            if (mStepNum == 0) {
+                mPrevButtonView.setVisibility(GONE);
+            }
 
-            mMainHandler = new Handler();
+            getLoaderManager().initLoader(0, null, this);
 
-            mTrackSelector = new DefaultTrackSelector();
-            mSimpleExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, mTrackSelector);
-            mSimpleExoPlayerView.setPlayer(mSimpleExoPlayer);
-
-            mediaDataSourceFactory = new DefaultDataSourceFactory(
-                    mContext, Util.getUserAgent(mContext, "TastyBakes")
-            );
-
+            setupPlayer();
         }
         return view;
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.v(TAG, "[onActivityCreated]");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.v(TAG, "[onStart]");
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(TAG, "[onResume]");
+        super.onResume();
+        if (mSimpleExoPlayer != null) {
+            Log.d(TAG, "[onResume] Found player");
+            mSimpleExoPlayer.seekTo(mPosition);
+        } else {
+            Log.d(TAG, "[onResume] No player");
+            setupPlayer();
+            initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(TAG, "[onPause]");
+        super.onPause();
+        if (mSimpleExoPlayer != null) {
+            mPosition = mSimpleExoPlayer.getCurrentPosition();
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.v(TAG, "[onStop]");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.v(TAG, "[onDestroyView]");
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        ReleasePlayer();
+        Log.v(TAG, "[onDestroy]");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.v(TAG, "[onDetach]");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putLong(SAVE_STATE_POSITION, mPosition);
+        outState.putInt(SAVE_STATE_RECIPE_FK, mRecipeFk);
+        outState.putInt(SAVE_STATE_STEP_ID, mStepNum);
     }
 
     @Override
@@ -151,6 +256,18 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         Log.d(TAG, "onDownstreamFormatChanged");
     }
 
+    private void setupPlayer() {
+        mMainHandler = new Handler();
+
+        mTrackSelector = new DefaultTrackSelector();
+        mSimpleExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, mTrackSelector);
+        mSimpleExoPlayerView.setPlayer(mSimpleExoPlayer);
+
+        mediaDataSourceFactory = new DefaultDataSourceFactory(
+                mContext, Util.getUserAgent(mContext, "TastyBakes")
+        );
+    }
+
     /**
      * Taken from ExoPlayer's demo application
      */
@@ -175,13 +292,14 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         }
     }
 
-    private void ReleasePlayer() {
+    private void releasePlayer() {
         mSimpleExoPlayer.stop();
         mSimpleExoPlayer.release();
         mSimpleExoPlayer = null;
     }
 
-    private void initializePlayer(String description, String shortDescription, String videoUrl, String thumbnailUrl) {
+    private void initializePlayer(String description, String shortDescription, String videoUrl, String thumbnailUrl, long position) {
+        Log.v(TAG, "[initializePlayer]");
 
         ActionBar actionBar = getActivity().getActionBar();
         if (actionBar != null) {
@@ -191,42 +309,39 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
 
         mStepDescriptionView.setText(description);
         mMp4VideoUri = Uri.parse(videoUrl);
-        if (videoUrl.isEmpty()) {
+        if (TextUtils.isEmpty(videoUrl)) {
             Log.d(TAG, shortDescription + ": No video URL");
             mSimpleExoPlayerView.setVisibility(GONE);
         } else {
             mMediaSource = buildMediaSource(mMp4VideoUri, null);
             mSimpleExoPlayer.prepare(mMediaSource);
-            positionMs = 0;
-            mSimpleExoPlayer.seekTo(positionMs);
+            mSimpleExoPlayer.seekTo(position);
             mSimpleExoPlayer.setPlayWhenReady(PLAY_WHEN_READY);
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        int recipeFK = args.getInt(ARG_RECIPE_FK_ID, -1);
-        int stepId = args.getInt(ARG_STEP_ID);
-        Log.v(TAG, "[onCreateLoader] recipeId:" + recipeFK + " stepId:" + stepId);
+        Log.v(TAG, "[onCreateLoader] recipeId:" + mRecipeFk + " stepId:" + mStepNum);
         return new CursorLoader(mContext,
                 StepProvider.Steps.CONTENT_URI,
                 null,
                 StepColumns.RECIPE_FK + " = ? AND " + StepColumns.STEP_ORDER + " = ?",
-                new String[]{String.valueOf(recipeFK), String.valueOf(stepId)},
+                new String[]{String.valueOf(mRecipeFk), String.valueOf(mStepNum)},
                 StepColumns.STEP_ORDER + " ASC");
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data.moveToFirst()) {
-            String description = data.getString(data.getColumnIndexOrThrow(StepColumns.DESCRIPTION));
-            String shortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
-            String videoUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.VIDEO_URL));
-            String thumbnailUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.THUMB_URL));
+            mDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.DESCRIPTION));
+            mShortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
+            mVideoUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.VIDEO_URL));
+            mThumbnailUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.THUMB_URL));
+            Log.v(TAG, "[onLoadFinished] Position: " + mPosition);
+            initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
 
-            initializePlayer(description, shortDescription, videoUrl, thumbnailUrl);
-
-            mStepDescriptionView.setText(description);
+            mStepDescriptionView.setText(mDescription);
         } else {
             Log.e(TAG, "[onLoadFinished] Could not find any steps!");
         }
@@ -235,5 +350,28 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.next_button:
+                mCaller.onStepNavigation(mStepNum + 1);
+                break;
+            case R.id.previous_button:
+                mCaller.onStepNavigation(mStepNum - 1);
+                break;
+            default:
+                Log.e(TAG, "[onClick] Illegal button click from: " + view.toString());
+                break;
+        }
+    }
+
+    private void setupInterface(Context context) {
+        try {
+            mCaller = (IRecipeStepFragment) context;
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
     }
 }
