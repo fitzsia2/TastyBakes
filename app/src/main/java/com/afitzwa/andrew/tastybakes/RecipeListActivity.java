@@ -59,7 +59,6 @@ public class RecipeListActivity extends AppCompatActivity
     }
 
     public void handleFetchUrlResult(String result) {
-        Log.v(TAG, "[handleFetchUrlResult]");
         SaveRecipesToDBTask saveRecipesToDBTask = new SaveRecipesToDBTask(this, this);
         saveRecipesToDBTask.execute(result);
     }
@@ -78,7 +77,6 @@ public class RecipeListActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.v(TAG, "[onLoadFinished]");
         mRecyclerView.setAdapter(new RecipeRecyclerViewAdapter(cursor));
     }
 
@@ -91,8 +89,6 @@ public class RecipeListActivity extends AppCompatActivity
     // Called by SaveRecipesToDBTask
     @Override
     public void notifyNewData() {
-        Log.v(TAG, "[notifyNewData]");
-
         getLoaderManager().initLoader(ARG_RECIPE_LOADER_ID, null, this);
 
         // Alert any widgets that we've updated recipes

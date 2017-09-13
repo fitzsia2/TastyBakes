@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
  * item details are presented side-by-side with a list of items
  * in a {@link RecipeListActivity}.
  */
-public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDetailFragment {
+public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDetailFragment, IRecipeStepFragment {
 
     private static final String TAG = RecipeDetailActivity.class.getSimpleName();
 
@@ -56,15 +56,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
             RecipeDetailFragment fragment = new RecipeDetailFragment();
             fragment.setArguments(arguments);
 
-            Log.v(TAG, "[onCreate] Replacing fragment");
-
             getFragmentManager().beginTransaction()
                     .add(R.id.detail_fragment_container, fragment)
                     .commit();
 
             if (findViewById(R.id.step_fragment_container) != null) {
                 mTwoPane = true;
-                Log.v(TAG, "two panes");
                 Bundle stepArgs = new Bundle();
                 stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeRowId);
                 stepArgs.putInt(RecipeStepFragment.ARG_STEP_ID, 0);
@@ -85,7 +82,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
 
     @Override
     public void onStepSelected(int stepRowId) {
-        Log.v(TAG, "[onStepSelected] recipeId:" + mRecipeRowId + " row:" + stepRowId);
         if (mTwoPane) {
             Bundle stepArgs = new Bundle();
             stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeRowId);
@@ -104,6 +100,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDe
             this.startActivity(intent);
 
         }
+    }
+
+    @Override
+    public void onStepNavigation(int stepId) {
+        onStepSelected(stepId);
     }
 
     @Override
