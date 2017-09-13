@@ -62,8 +62,6 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
 
                     if (recipeCursor.moveToFirst()) {
 
-                        Log.v(TAG, "[onDataSetChanged]Found " + recipeCursor.getCount() + " records for " + recipe);
-
                         int idCol = recipeCursor.getColumnIndexOrThrow(RecipeColumns._ID);
 
                         int recipeId = recipeCursor.getInt(idCol);
@@ -96,10 +94,9 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
             @Override
             public int getCount() {
                 if (mCursor != null) {
-                    Log.v(TAG, "[getCount]" + mCursor.getCount() + " entries");
                     return mCursor.getCount();
                 } else {
-                    Log.w(TAG, "[getCount]Cursor null");
+                    Log.e(TAG, "[getCount] Cursor null");
                     return 0;
                 }
             }

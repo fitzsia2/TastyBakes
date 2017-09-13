@@ -40,8 +40,6 @@ public class RecipeStepActivity extends AppCompatActivity implements IRecipeStep
             int stepId = getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_STEP_ID, -1);
             mRecipeFK = getIntent().getIntExtra(RecipeStepActivity.ARG_RECIPE_FK_ID, -1);
 
-            Log.v(TAG, "[onCreate] fk:" + mRecipeFK + " step:" + stepId);
-
             arguments.putInt(RecipeStepFragment.ARG_STEP_ID, stepId);
             arguments.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeFK);
 
@@ -58,8 +56,6 @@ public class RecipeStepActivity extends AppCompatActivity implements IRecipeStep
         // Create the detail fragment and add it to the activity
         // using a fragment transaction.
         Bundle arguments = new Bundle();
-
-        Log.v(TAG, "[onStepNavigation] fk:" + mRecipeFK + " step:" + stepId);
 
         arguments.putInt(RecipeStepFragment.ARG_STEP_ID, stepId);
         arguments.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeFK);

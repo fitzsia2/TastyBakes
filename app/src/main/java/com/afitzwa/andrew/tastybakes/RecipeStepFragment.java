@@ -100,19 +100,11 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.v(TAG, "[onCreate]");
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_step, container, false);
 
         ButterKnife.bind(this, view);
-
-        Log.v(TAG, "[onCreateView]");
 
         mNextButtonView.setOnClickListener(this);
         mPrevButtonView.setOnClickListener(this);
@@ -134,8 +126,6 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         }
 
         if (bundle != null) {
-            Log.v(TAG, "[onCreateView] fk(" + bundle.getInt(ARG_RECIPE_FK_ID, -1) + ") row(" + bundle.getInt(ARG_STEP_ID, -1) + ")");
-
             mRecipeFk = bundle.getInt(ARG_RECIPE_FK_ID, -1);
             mStepNum = bundle.getInt(ARG_STEP_ID, -1);
             if (mStepNum == 0) {
@@ -150,26 +140,11 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.v(TAG, "[onActivityCreated]");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.v(TAG, "[onStart]");
-    }
-
-    @Override
     public void onResume() {
-        Log.d(TAG, "[onResume]");
         super.onResume();
         if (mSimpleExoPlayer != null) {
-            Log.d(TAG, "[onResume] Found player");
             mSimpleExoPlayer.seekTo(mPosition);
         } else {
-            Log.d(TAG, "[onResume] No player");
             setupPlayer();
             initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
         }
@@ -177,36 +152,11 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
 
     @Override
     public void onPause() {
-        Log.d(TAG, "[onPause]");
         super.onPause();
         if (mSimpleExoPlayer != null) {
             mPosition = mSimpleExoPlayer.getCurrentPosition();
             releasePlayer();
         }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.v(TAG, "[onStop]");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.v(TAG, "[onDestroyView]");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.v(TAG, "[onDestroy]");
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Log.v(TAG, "[onDetach]");
     }
 
     @Override
@@ -299,8 +249,6 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     }
 
     private void initializePlayer(String description, String shortDescription, String videoUrl, String thumbnailUrl, long position) {
-        Log.v(TAG, "[initializePlayer]");
-
         ActionBar actionBar = getActivity().getActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -322,7 +270,6 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.v(TAG, "[onCreateLoader] recipeId:" + mRecipeFk + " stepId:" + mStepNum);
         return new CursorLoader(mContext,
                 StepProvider.Steps.CONTENT_URI,
                 null,
@@ -338,7 +285,6 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
             mShortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
             mVideoUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.VIDEO_URL));
             mThumbnailUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.THUMB_URL));
-            Log.v(TAG, "[onLoadFinished] Position: " + mPosition);
             initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
 
             mStepDescriptionView.setText(mDescription);
