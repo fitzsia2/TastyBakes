@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
@@ -49,18 +50,25 @@ public class RecipeListActivity extends AppCompatActivity
 
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        mRecipesCursor = getContentResolver().query(RecipeProvider.Recipes.CONTENT_URI, null, null, null, null);
-        mRecyclerView.setAdapter(new RecipeRecyclerViewAdapter(mRecipesCursor));
-
         setSupportActionBar(mToolbar);
 
         FetchUrlTask fetchUrlTask = new FetchUrlTask(this);
         fetchUrlTask.execute(RECIPE_URL);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mRecipesCursor = getContentResolver().query(RecipeProvider.Recipes.CONTENT_URI, null, null, null, null);
+        mRecyclerView.setAdapter(new RecipeRecyclerViewAdapter(mRecipesCursor));
+    }
+
     public void handleFetchUrlResult(String result) {
-        SaveRecipesToDBTask saveRecipesToDBTask = new SaveRecipesToDBTask(this, this);
-        saveRecipesToDBTask.execute(result);
+        if (!TextUtils.isEmpty(result)) {
+            SaveRecipesToDBTask saveRecipesToDBTask = new SaveRecipesToDBTask(this, this);
+            saveRecipesToDBTask.execute(result);
+        }
     }
 
     @Override
