@@ -1,6 +1,8 @@
 package com.afitzwa.andrew.tastybakes.network;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
@@ -14,28 +16,33 @@ import okhttp3.Response;
 
 public class FetchUrlTask extends AsyncTask<String, Void, String> {
     private final IFetchUrlTask mCaller;
+    private final Context mContext;
 
-    public FetchUrlTask(IFetchUrlTask cb) {
+    public FetchUrlTask(@NonNull IFetchUrlTask cb, @NonNull Context context) {
         mCaller = cb;
+        mContext = context;
     }
 
     @Override
     protected String doInBackground(String... strings) {
-        String url = strings[0];
+        if (NetworkUtil.isConnected(mContext)) {
 
-        OkHttpClient client = new OkHttpClient();
+            String url = strings[0];
+
+            OkHttpClient client = new OkHttpClient();
 
         try {
             Request request = new Request.Builder()
                     .url(url)
                     .build();
 
-            Response response = client.newCall(request).execute();
-            return response.body().string();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+                Response response = client.newCall(request).execute();
+                return response.body().string();
+            } catch (IOException | NullPointerException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
     @Override

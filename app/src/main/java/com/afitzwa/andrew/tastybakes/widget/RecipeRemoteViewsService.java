@@ -56,7 +56,7 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
 
                 Cursor recipeCursor =  getContentResolver().query(
                         RecipeProvider.Recipes.CONTENT_URI,
-                        null, null, null, null);
+                        null, RecipeColumns.NAME + " = " + recipe, null, null);
 
                 if (recipeCursor != null) {
 
@@ -72,13 +72,13 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
                                 null, null);
 
                     } else {
-                        Log.e(TAG, "[onDataSetChanged]Could not move to first record");
+                        Log.w(TAG, "[onDataSetChanged] Could not get ingredients for " + recipe);
                     }
 
                     recipeCursor.close();
 
                 } else {
-                    Log.e(TAG, "[onDataSetChanged]Could not get recipe cursor");
+                    Log.e(TAG, "[onDataSetChanged] Could not get recipe cursor");
                 }
 
 
@@ -96,7 +96,7 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
                 if (mCursor != null) {
                     return mCursor.getCount();
                 } else {
-                    Log.e(TAG, "[getCount] Cursor null");
+                    Log.w(TAG, "[getCount] Cursor null");
                     return 0;
                 }
             }

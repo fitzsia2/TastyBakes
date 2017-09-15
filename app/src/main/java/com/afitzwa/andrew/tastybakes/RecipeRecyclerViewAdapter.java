@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.afitzwa.andrew.tastybakes.data.RecipeColumns;
+import com.afitzwa.andrew.tastybakes.network.NetworkUtil;
+import com.bumptech.glide.Glide;
 
 /**
  * Recycler View Adapter used for managing the list of recipes
@@ -18,10 +21,12 @@ public class RecipeRecyclerViewAdapter
 
     public static final String TAG = RecipeRecyclerViewAdapter.class.getSimpleName();
 
-    final Cursor mCursor;
+    private final Cursor mCursor;
+    final private Context mContext;
 
-    RecipeRecyclerViewAdapter(Cursor c) {
+    RecipeRecyclerViewAdapter(Cursor c, Context context) {
         mCursor = c;
+        mContext = context;
     }
 
     @Override
@@ -38,9 +43,14 @@ public class RecipeRecyclerViewAdapter
 
         String recipeName = mCursor.getString(mCursor.getColumnIndexOrThrow(RecipeColumns.NAME));
         int servings = mCursor.getInt(mCursor.getColumnIndexOrThrow(RecipeColumns.SERVINGS));
+        String imageUrl = mCursor.getString(mCursor.getColumnIndexOrThrow(RecipeColumns.IMAGE_URL));
 
         holder.setRecipeName(recipeName);
         holder.setContent("Serves " + servings);
+
+        if (!TextUtils.isEmpty(imageUrl) && NetworkUtil.isConnected(mContext)) {
+            Glide.with(holder.itemView).load(imageUrl).into(holder.getThumnailView());
+        }
 
         holder.getView().setOnClickListener(new View.OnClickListener() {
             @Override

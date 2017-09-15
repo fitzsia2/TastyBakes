@@ -1,13 +1,9 @@
 package com.afitzwa.andrew.tastybakes;
 
-import android.content.ContentResolver;
+import android.app.Activity;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
-
-import com.afitzwa.andrew.tastybakes.data.IngredientProvider;
-import com.afitzwa.andrew.tastybakes.data.RecipeProvider;
-import com.afitzwa.andrew.tastybakes.data.StepProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,6 +28,8 @@ import static org.hamcrest.Matchers.allOf;
 @RunWith(AndroidJUnit4.class)
 public class RecipeListActivityTest {
 
+    Activity mActivity;
+
     @Rule
     public IntentsTestRule<RecipeListActivity> mActivityRule =
             new IntentsTestRule<>(RecipeListActivity.class);
@@ -39,7 +37,8 @@ public class RecipeListActivityTest {
 
     @Before
     public void preTest() {
-        clearContentProvider();
+        mActivity = mActivityRule.getActivity();
+        ContentProviderTestUtils.clearContentProvider(mActivity);
     }
 
 
@@ -56,13 +55,6 @@ public class RecipeListActivityTest {
 
     @After
     public void postTest() {
-        clearContentProvider();
-    }
-
-    private void clearContentProvider() {
-        ContentResolver contentResolver = mActivityRule.getActivity().getContentResolver();
-        contentResolver.delete(RecipeProvider.Recipes.CONTENT_URI, null, null);
-        contentResolver.delete(IngredientProvider.Ingredients.CONTENT_URI, null, null);
-        contentResolver.delete(StepProvider.Steps.CONTENT_URI, null, null);
+        ContentProviderTestUtils.clearContentProvider(mActivity);
     }
 }

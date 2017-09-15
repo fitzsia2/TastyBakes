@@ -2,6 +2,7 @@ package com.afitzwa.andrew.tastybakes;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -12,6 +13,7 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder {
     private final View mView;
     private final TextView mRecipeNameView;
     private final TextView mContentView;
+    private final ImageView mThumbNail;
 
     public View getView() {
         return mView;
@@ -25,6 +27,10 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder {
         mRecipeNameView.setText(name);
     }
 
+    public ImageView getThumnailView() {
+        return mThumbNail;
+    }
+
     public void setContent(String content) {
         mContentView.setText(content);
     }
@@ -34,5 +40,6 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder {
         mView = view;
         mRecipeNameView = view.findViewById(R.id.recipe_title);
         mContentView = view.findViewById(R.id.content);
+        mThumbNail = view.findViewById(R.id.recipe_icon);
     }
 }

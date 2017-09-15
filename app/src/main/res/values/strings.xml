@@ -9,4 +9,6 @@
     <string name="widget_empty_list_view">Reconfigure Widget</string>
     <string name="next_step_button_text">next step</string>
     <string name="previous_step_button_text">previous step</string>
+    <string name="content_not_available_text">No content not available</string>
+    <string name="no_connection_toast">Internet inaccessible</string>
 </resources>
