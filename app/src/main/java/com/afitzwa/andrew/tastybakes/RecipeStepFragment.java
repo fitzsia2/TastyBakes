@@ -10,17 +10,20 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afitzwa.andrew.tastybakes.data.StepColumns;
 import com.afitzwa.andrew.tastybakes.data.StepProvider;
+import com.afitzwa.andrew.tastybakes.network.NetworkUtil;
+import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
@@ -47,6 +50,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -79,15 +83,16 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     private int mStepNum;
     private int mRecipeFk;
 
-    String mDescription;
-    String mShortDescription;
-    String mVideoUrl;
-    String mThumbnailUrl;
+    private String mDescription;
+    private String mVideoUrl;
+    private String mThumbnailUrl;
 
     @BindView(R.id.recipe_step_detail) TextView mStepDescriptionView;
     @BindView(R.id.player_view) SimpleExoPlayerView mSimpleExoPlayerView;
     @BindView(R.id.next_button) Button mNextButtonView;
     @BindView(R.id.previous_button) Button mPrevButtonView;
+    @BindView(R.id.step_image_view) ImageView mImageView;
+    @BindView(R.id.step_text_view) TextView mNoImgTextView;
 
     public RecipeStepFragment() {
     }
@@ -146,7 +151,7 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
             mSimpleExoPlayer.seekTo(mPosition);
         } else {
             setupPlayer();
-            initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
+            initializePlayer(mDescription, mVideoUrl, mThumbnailUrl, mPosition);
         }
     }
 
@@ -248,23 +253,26 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         mSimpleExoPlayer = null;
     }
 
-    private void initializePlayer(String description, String shortDescription, String videoUrl, String thumbnailUrl, long position) {
-        ActionBar actionBar = getActivity().getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(shortDescription);
-        }
+    private void initializePlayer(String description, String videoUrl, String thumbnailUrl, long position) {
+
+        boolean isConnected = NetworkUtil.isConnected(mContext);
 
         mStepDescriptionView.setText(description);
-        mMp4VideoUri = Uri.parse(videoUrl);
-        if (TextUtils.isEmpty(videoUrl)) {
-            Log.d(TAG, shortDescription + ": No video URL");
-            mSimpleExoPlayerView.setVisibility(GONE);
-        } else {
+
+        if ( isConnected && !TextUtils.isEmpty(videoUrl)) { // connection and video
+            mSimpleExoPlayerView.setVisibility(VISIBLE);
+            mMp4VideoUri = Uri.parse(videoUrl);
             mMediaSource = buildMediaSource(mMp4VideoUri, null);
             mSimpleExoPlayer.prepare(mMediaSource);
             mSimpleExoPlayer.seekTo(position);
             mSimpleExoPlayer.setPlayWhenReady(PLAY_WHEN_READY);
+        } else if (isConnected && !TextUtils.isEmpty(thumbnailUrl)) { // connection and image
+            mImageView.setVisibility(VISIBLE);
+            Glide.with(this).load(thumbnailUrl).into(mImageView);
+        } else {
+            if (!isConnected)
+                Toast.makeText(mContext, R.string.no_connection_toast, Toast.LENGTH_SHORT).show();
+            mNoImgTextView.setVisibility(VISIBLE); // no connection or images
         }
     }
 
@@ -282,10 +290,17 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data.moveToFirst()) {
             mDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.DESCRIPTION));
-            mShortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
+
+            String shortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
+            ActionBar actionBar = getActivity().getActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setTitle(shortDescription);
+            }
+
             mVideoUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.VIDEO_URL));
             mThumbnailUrl = data.getString(data.getColumnIndexOrThrow(StepColumns.THUMB_URL));
-            initializePlayer(mDescription, mShortDescription, mVideoUrl, mThumbnailUrl, mPosition);
+            initializePlayer(mDescription, mVideoUrl, mThumbnailUrl, mPosition);
 
             mStepDescriptionView.setText(mDescription);
         } else {
