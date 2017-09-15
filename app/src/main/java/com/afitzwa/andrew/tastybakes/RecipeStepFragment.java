@@ -8,6 +8,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -63,11 +64,13 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
     private static final String SAVE_STATE_RECIPE_FK = "recipe_fk";
     private static final String SAVE_STATE_STEP_ID = "step_id";
 
+    private final int LOADER_ID = 0;
+
+    private final static boolean PLAY_WHEN_READY = true;
+
     public static final String ARG_RECIPE_FK_ID = "recipe_fk_id";
 
     public static final String ARG_STEP_ID = "step_id";
-
-    final static boolean PLAY_WHEN_READY = true;
 
     // Exoplayer resources
     private Handler mMainHandler;
@@ -133,14 +136,12 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         if (bundle != null) {
             mRecipeFk = bundle.getInt(ARG_RECIPE_FK_ID, -1);
             mStepNum = bundle.getInt(ARG_STEP_ID, -1);
-            if (mStepNum == 0) {
-                mPrevButtonView.setVisibility(GONE);
-            }
 
-            getLoaderManager().initLoader(0, null, this);
-
-            setupPlayer();
+            getLoaderManager().initLoader(LOADER_ID, null, this);
         }
+
+        setupPlayer();
+
         return view;
     }
 
@@ -281,14 +282,15 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
         return new CursorLoader(mContext,
                 StepProvider.Steps.CONTENT_URI,
                 null,
-                StepColumns.RECIPE_FK + " = ? AND " + StepColumns.STEP_ORDER + " = ?",
-                new String[]{String.valueOf(mRecipeFk), String.valueOf(mStepNum)},
+                StepColumns.RECIPE_FK + " = " + mRecipeFk,
+                null,
                 StepColumns.STEP_ORDER + " ASC");
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data.moveToFirst()) {
+        if (data.moveToPosition(mStepNum)){
+
             mDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.DESCRIPTION));
 
             String shortDescription = data.getString(data.getColumnIndexOrThrow(StepColumns.SHORT_DESC));
@@ -303,14 +305,19 @@ public class RecipeStepFragment extends Fragment implements AdaptiveMediaSourceE
             initializePlayer(mDescription, mVideoUrl, mThumbnailUrl, mPosition);
 
             mStepDescriptionView.setText(mDescription);
-        } else {
-            Log.e(TAG, "[onLoadFinished] Could not find any steps!");
+
+            if (mStepNum == data.getCount() - 1) {
+                mNextButtonView.setEnabled(false);
+            }
+            if (mStepNum == 0) {
+                mPrevButtonView.setEnabled(false);
+            }
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        Log.v(TAG, "[onLoaderReset]");
     }
 
     @Override

@@ -15,7 +15,8 @@ import butterknife.ButterKnife;
  * item details are presented side-by-side with a list of items
  * in a {@link RecipeListActivity}.
  */
-public class RecipeDetailActivity extends AppCompatActivity implements IRecipeDetailFragment, IRecipeStepFragment {
+public class RecipeDetailActivity extends AppCompatActivity
+        implements IRecipeDetailFragment, IRecipeStepFragment {
 
     private static final String TAG = RecipeDetailActivity.class.getSimpleName();
 
