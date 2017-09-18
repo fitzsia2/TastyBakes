@@ -88,7 +88,7 @@ public class DetailActivityTest {
 
         // if the step_fragment_container is displayed, a new activity will not be launched
         try {
-            onView(withId(R.id.step_fragment_container)).check(matches(isDisplayed()));
+            onView(withId(R.id.step_fragment)).check(matches(isDisplayed()));
             Log.v(TAG, "Running in two-pane mode, skipping intent check");
         } catch (NoMatchingViewException e) {
             Log.v(TAG, "Running in single-pane mode, checking intent");

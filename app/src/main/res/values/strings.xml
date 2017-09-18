@@ -4,7 +4,6 @@
     <string name="title_activity_recipe_step">Recipe Step Activity</string>
     <string name="list_content_img_desc">photo</string>
     <string name="configure">Configure</string>
-    <string name="add_widget">Add widget</string>
     <string name="widget_recipe_name_text_view">[Recipe Name]</string>
     <string name="widget_empty_list_view">Reconfigure Widget</string>
     <string name="next_step_button_text">next step</string>

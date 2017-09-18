@@ -22,6 +22,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/detail_content_frame" />
+    <include layout="@layout/recipe_detail_layout" />
 
 </android.support.design.widget.CoordinatorLayout>

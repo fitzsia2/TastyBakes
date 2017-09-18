@@ -1,5 +1,6 @@
 package com.afitzwa.andrew.tastybakes;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,19 +34,22 @@ public class RecipeDetailActivity extends AppCompatActivity
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
-    private static final String TWO_PANE_ID = "isTwoPane";
     private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
+        ButterKnife.bind(this);
+
+        String recipeName = getIntent().getStringExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID);
+        mRecipeRowId = getIntent().getIntExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, -1);
+
+        mToolbar.setTitle(recipeName);
+
+        mTwoPane = getResources().getBoolean(R.bool.has_two_panes);
 
         if (savedInstanceState == null) {
-            ButterKnife.bind(this);
-
-            String recipeName = getIntent().getStringExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID);
-            mRecipeRowId = getIntent().getIntExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, -1);
 
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
@@ -58,28 +62,36 @@ public class RecipeDetailActivity extends AppCompatActivity
             fragment.setArguments(arguments);
 
             getFragmentManager().beginTransaction()
-                    .add(R.id.detail_fragment_container, fragment)
+                    .add(R.id.detail_fragment_container, fragment, STEP_FRAGMENT_TAG)
                     .commit();
 
-            if (findViewById(R.id.step_fragment_container) != null) {
-                mTwoPane = true;
-                Bundle stepArgs = new Bundle();
-                stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, mRecipeRowId);
-                stepArgs.putInt(RecipeStepFragment.ARG_STEP_ID, 0);
-
-                RecipeStepFragment stepFragment = new RecipeStepFragment();
-                stepFragment.setArguments(stepArgs);
-
-                getFragmentManager().beginTransaction()
-                        .add(R.id.step_fragment_container, stepFragment)
-                        .commit();
+            if (mTwoPane && (findViewById(R.id.step_fragment) != null)) {
+                addStepDetailFragment(mRecipeRowId, 0);
             }
 
-            mToolbar.setTitle(recipeName);
         } else {
-            mTwoPane = savedInstanceState.getBoolean(TWO_PANE_ID);
+            Fragment stepFragment = getFragmentManager().findFragmentByTag(STEP_FRAGMENT_TAG);
+            if (stepFragment == null) {
+                addStepDetailFragment(mRecipeRowId, 0);
+            }
         }
     }
+
+    private void addStepDetailFragment(int recipeFK, int stepId) {
+        Log.d(TAG, "Adding step fragment");
+        Bundle stepArgs = new Bundle();
+        stepArgs.putInt(RecipeStepFragment.ARG_RECIPE_FK_ID, recipeFK);
+        stepArgs.putInt(RecipeStepFragment.ARG_STEP_ID, stepId);
+
+        RecipeStepFragment stepFragment = new RecipeStepFragment();
+        stepFragment.setArguments(stepArgs);
+
+        getFragmentManager().beginTransaction()
+                .replace(R.id.step_fragment, stepFragment)
+                .commit();
+
+    }
+
 
     @Override
     public void onStepSelected(int stepRowId) {
@@ -92,7 +104,7 @@ public class RecipeDetailActivity extends AppCompatActivity
             stepFragment.setArguments(stepArgs);
 
             getFragmentManager().beginTransaction()
-                    .replace(R.id.step_fragment_container, stepFragment)
+                    .replace(R.id.step_fragment, stepFragment)
                     .commit();
         } else {
             Intent intent = new Intent(this, RecipeStepActivity.class);
@@ -106,11 +118,5 @@ public class RecipeDetailActivity extends AppCompatActivity
     @Override
     public void onStepNavigation(int stepId) {
         onStepSelected(stepId);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(TWO_PANE_ID, mTwoPane);
     }
 }
