@@ -53,7 +53,7 @@ public class RecipeDetailFragment extends Fragment
         super.onCreate(savedInstanceState);
 
 
-        if (getArguments().containsKey(ARG_RECIPE_NAME_ID)) {
+        if (getArguments().containsKey(ARG_RECIPE_ROW_ID)) {
             mRecipeRowId = getArguments().getInt(ARG_RECIPE_ROW_ID);
         }
 

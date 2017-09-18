@@ -1,12 +1,9 @@
 package com.afitzwa.andrew.tastybakes;
 
-import android.app.Activity;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,11 +11,9 @@ import org.junit.runner.RunWith;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.intent.Intents.intended;
-import static android.support.test.espresso.intent.Intents.intending;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.isInternal;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.toPackage;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.Matchers.allOf;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -28,33 +23,19 @@ import static org.hamcrest.Matchers.allOf;
 @RunWith(AndroidJUnit4.class)
 public class RecipeListActivityTest {
 
-    Activity mActivity;
-
     @Rule
-    public IntentsTestRule<RecipeListActivity> mActivityRule =
+    public IntentsTestRule<RecipeListActivity> mRule =
             new IntentsTestRule<>(RecipeListActivity.class);
 
-
-    @Before
-    public void preTest() {
-        mActivity = mActivityRule.getActivity();
-        ContentProviderTestUtils.clearContentProvider(mActivity);
+    @Test
+    public void recipeListExists() {
+        isDisplayed().matches(withId(R.id.recipe_list));
     }
-
 
     @Test
-    public void clickRecipe_startActivity() {
-
-        intending(isInternal());
-
-        onView(withId(R.id.recipe_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-
-        intended(allOf(hasComponent(RecipeDetailActivity.class.getName())));
-    }
-
-
-    @After
-    public void postTest() {
-        ContentProviderTestUtils.clearContentProvider(mActivity);
+    public void clickRecipe_StartDetailActivity() {
+        onView(withId(R.id.recipe_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        intended(toPackage("com.afitzwa.andrew.tastybakes"));
     }
 }
