@@ -25,7 +25,7 @@ public final class ContentProviderTestUtils {
     public static final String INGREDIENT_NAME = "flour";
     public static final String INGREDIENT_MEASURE = "flour";
 
-    public void addFakeEntriesToProvider(Activity activity) {
+    public static void addFakeEntriesToProvider(Activity activity) {
         ContentValues recipeValues = new ContentValues();
         recipeValues.put(RecipeColumns.NAME, RECIPE_NAME);
         recipeValues.put(RecipeColumns.IMAGE_URL, RECIPE_URL);
