@@ -56,7 +56,7 @@ public class RecipeRemoteViewsService extends RemoteViewsService {
 
                 Cursor recipeCursor =  getContentResolver().query(
                         RecipeProvider.Recipes.CONTENT_URI,
-                        null, RecipeColumns.NAME + " = " + recipe, null, null);
+                        null, RecipeColumns.NAME + " = ?", new String[]{recipe}, null);
 
                 if (recipeCursor != null) {
 
