@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -28,8 +27,6 @@ public class RecipeDetailActivity extends AppCompatActivity
 
     private static int mRecipeRowId;
 
-    @BindView(R.id.detail_toolbar) Toolbar mToolbar;
-
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -45,7 +42,10 @@ public class RecipeDetailActivity extends AppCompatActivity
         String recipeName = getIntent().getStringExtra(RecipeDetailActivity.ARG_RECIPE_NAME_ID);
         mRecipeRowId = getIntent().getIntExtra(RecipeDetailActivity.ARG_RECIPE_ROW_ID, -1);
 
-        mToolbar.setTitle(recipeName);
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(recipeName);
+        }
 
         mTwoPane = getResources().getBoolean(R.bool.has_two_panes);
 
