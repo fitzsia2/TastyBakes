@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -37,6 +38,17 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
             Intent intent = new Intent(context, RecipeRemoteViewsService.class);
             intent.putExtra(RecipeRemoteViewsService.RECIPE_TITLE_KEY, recipe);
+
+
+
+            // MAKE INTENT MORE UNIQUE
+            // ENSURES SYSTEM DOES NOT REUSE THE SAME INTENT
+            intent.putExtra("Random", Math.random() * 1000);
+            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            
+
+
             widgetView.setRemoteAdapter(R.id.widget_ingredient_list, intent);
         }
 
